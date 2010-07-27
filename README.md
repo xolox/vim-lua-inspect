@@ -16,7 +16,7 @@ When you open any Lua file the semantic highlighting should be enabled automatic
 
 ### The `:LuaInspect` command
 
-You shouldn't need to execute this command manually unless you've disabled automatic highlighting using the `g:lua_inspect_automatic` option. When you execute the `:LuaInspect` command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
+You shouldn't need to execute this command manually unless you've disabled automatic highlighting using the `g:lua_inspect_events` option. When you execute the `:LuaInspect` command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
 
  * <span style="color: #600000">luaInspectGlobalDefined</span>
  * <span style="color: #FFF; background: #F00">luaInspectGlobalUndefined</span>
@@ -30,11 +30,17 @@ You shouldn't need to execute this command manually unless you've disabled autom
 
 If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default).
 
-### The `g:lua_inspect_automatic` option
+### The `g:lua_inspect_events` option
 
-By default semantic highlighting is automatically enabled after a short timeout. If you don't want this you can add the following to your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
+By default semantic highlighting is automatically enabled after a short timeout and when you save a buffer. If you want to disable automatic highlighting altogether add the following to your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
 
-    :let g:lua_inspect_automatic = 0
+    :let g:lua_inspect_events = ''
+
+You can also add events, e.g.:
+
+    :let g:lua_inspect_events = 'CursorHold,CursorHoldI,InsertLeave'
+
+Note that this only works when the plug-in is loaded (or reloaded) *after* setting the `g:lua_inspect_events` option.
 
 ### The `g:lua_inspect_internal` option
 

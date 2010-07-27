@@ -6,9 +6,9 @@
 
 " Configuration defaults. {{{1
 
-if !exists('g:lua_inspect_automatic')
-  " Set this to false (0) to disable the automatic command.
-  let g:lua_inspect_automatic = 1
+if !exists('g:lua_inspect_events')
+  " Change this to enable semantic highlighting on your preferred events.
+  let g:lua_inspect_events = 'CursorHold,CursorHoldI,BufWritePost'
 endif
 
 if !exists('g:lua_inspect_internal')
@@ -24,13 +24,18 @@ endif
 command! LuaInspect call s:RunLuaInspect()
 
 augroup PluginLuaInspect
-  autocmd! CursorHold,CursorHoldI * call s:AutoEnable()
+  " Clear existing automatic commands.
+  autocmd! 
+  " Define the configured automatic commands.
+  for s:event in split(g:lua_inspect_events, ',')
+    execute 'autocmd' s:event '* call s:AutoEnable()'
+  endfor
 augroup END
 
 " Script local functions. {{{1
 
 function! s:AutoEnable()
-  if &filetype == 'lua' && g:lua_inspect_automatic
+  if &filetype == 'lua'
     LuaInspect
   end
 endfunction
