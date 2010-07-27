@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: July 27, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1
+" Version: 0.1.2
 
 " Configuration defaults. {{{1
 
@@ -64,25 +64,25 @@ endfunction
 
 function! s:InitHighlighting()
   " Clear existing highlighting.
-  if hlexists('luaInspectDefinedGlobal') | syntax clear luaInspectDefinedGlobal | endif
-  if hlexists('luaInspectUndefinedGlobal') | syntax clear luaInspectUndefinedGlobal | endif
-  if hlexists('luaInspectUnusedLocal') | syntax clear luaInspectUnusedLocal | endif
-  if hlexists('luaInspectMutatedLocal') | syntax clear luaInspectMutatedLocal | endif
+  if hlexists('luaInspectGlobalDefined') | syntax clear luaInspectGlobalDefined | endif
+  if hlexists('luaInspectGlobalUndefined') | syntax clear luaInspectGlobalUndefined | endif
+  if hlexists('luaInspectLocalUnused') | syntax clear luaInspectLocalUnused | endif
+  if hlexists('luaInspectLocalMutated') | syntax clear luaInspectLocalMutated | endif
   if hlexists('luaInspectUpValue') | syntax clear luaInspectUpValue | endif
   if hlexists('luaInspectParam') | syntax clear luaInspectParam | endif
   if hlexists('luaInspectLocal') | syntax clear luaInspectLocal | endif
-  if hlexists('luaInspectDefinedField') | syntax clear luaInspectDefinedField | endif
-  if hlexists('luaInspectUndefinedField') | syntax clear luaInspectUndefinedField | endif
+  if hlexists('luaInspectFieldDefined') | syntax clear luaInspectFieldDefined | endif
+  if hlexists('luaInspectFieldUndefined') | syntax clear luaInspectFieldUndefined | endif
   " Define default styles (copied from /luainspect/scite.lua for consistency).
-  hi luaInspectDefinedGlobal guifg=#600000
-  hi def link luaInspectUndefinedGlobal WarningMsg
-  hi luaInspectUnusedLocal guifg=#ffffff guibg=#0000ff
-  hi luaInspectMutatedLocal gui=italic guifg=#000080
+  hi luaInspectGlobalDefined guifg=#600000
+  hi def link luaInspectGlobalUndefined WarningMsg
+  hi luaInspectLocalUnused guifg=#ffffff guibg=#0000ff
+  hi luaInspectLocalMutated gui=italic guifg=#000080
   hi luaInspectUpValue guifg=#0000ff
   hi luaInspectParam guifg=#000040
   hi luaInspectLocal guifg=#000080
-  hi luaInspectDefinedField guifg=#600000
-  hi luaInspectUndefinedField guifg=#c00000
+  hi luaInspectFieldDefined guifg=#600000
+  hi luaInspectFieldUndefined guifg=#c00000
   " TODO Consider the &background?
 endfunction
 

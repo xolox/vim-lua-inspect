@@ -1,3 +1,13 @@
+--[[
+
+ This module is part of the luainspect.vim plug-in for the Vim text editor.
+
+ Author: Peter Odding <peter@peterodding.com>
+ Last Change: July 27, 2010
+ URL: http://peterodding.com/code/vim/lua-inspect/
+
+--]]
+
 local function offset2lineinfo(text, offset)
   -- TODO Cache intermediate results because they won't change within a single
   --      call to the function returned from this module below.
@@ -37,15 +47,15 @@ return function(text)
       for i, note in ipairs(LI.inspect(ast)) do
         if note.type == 'global' then
           if note.definedglobal then
-            dumpvar('luaInspectDefinedGlobal', note[1], note[2])
+            dumpvar('luaInspectGlobalDefined', note[1], note[2])
           else
-            dumpvar('luaInspectUndefinedGlobal', note[1], note[2])
+            dumpvar('luaInspectGlobalUndefined', note[1], note[2])
           end
         elseif note.type == 'local' then
           if not note.ast.localdefinition.isused then
-            dumpvar('luaInspectUnusedLocal', note[1], note[2])
+            dumpvar('luaInspectLocalUnused', note[1], note[2])
           elseif note.ast.localdefinition.isset then
-            dumpvar('luaInspectMutatedLocal', note[1], note[2])
+            dumpvar('luaInspectLocalMutated', note[1], note[2])
           elseif note.ast.localdefinition.functionlevel  < note.ast.functionlevel then
             dumpvar('luaInspectUpValue', note[1], note[2])
           elseif note.ast.localdefinition.isparam then
@@ -55,9 +65,9 @@ return function(text)
           end
         elseif note.type == 'field' then
           if note.definedglobal or note.ast.seevalue.value ~= nil then
-            dumpvar('luaInspectDefinedField', note[1], note[2])
+            dumpvar('luaInspectFieldDefined', note[1], note[2])
           else
-            dumpvar('luaInspectUndefinedField', note[1], note[2])
+            dumpvar('luaInspectFieldUndefined', note[1], note[2])
           end
         end
       end
