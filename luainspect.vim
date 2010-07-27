@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: July 27, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.2
+" Version: 0.1.3
 
 " Configuration defaults. {{{1
 
@@ -53,7 +53,8 @@ EOF
     let listing = system("lua -e 'require\"luainspect4vim\" (io.read \"*a\")'", l:text)
   endif
   " Clear previously created highlighting.
-  call s:InitHighlighting()
+  call s:LoadDefaultStyles()
+  call s:ClearPreviousMatches()
   " Highlight variables in buffer based on positions.
   for fields in split(listing, "\n")
     let [type, lnum, start, end] = split(fields)
@@ -62,7 +63,7 @@ EOF
   endfor
 endfunction
 
-function! s:InitHighlighting()
+function! s:ClearPreviousMatches()
   " Clear existing highlighting.
   if hlexists('luaInspectGlobalDefined') | syntax clear luaInspectGlobalDefined | endif
   if hlexists('luaInspectGlobalUndefined') | syntax clear luaInspectGlobalUndefined | endif
@@ -73,17 +74,32 @@ function! s:InitHighlighting()
   if hlexists('luaInspectLocal') | syntax clear luaInspectLocal | endif
   if hlexists('luaInspectFieldDefined') | syntax clear luaInspectFieldDefined | endif
   if hlexists('luaInspectFieldUndefined') | syntax clear luaInspectFieldUndefined | endif
-  " Define default styles (copied from /luainspect/scite.lua for consistency).
-  hi luaInspectGlobalDefined guifg=#600000
-  hi def link luaInspectGlobalUndefined WarningMsg
-  hi luaInspectLocalUnused guifg=#ffffff guibg=#0000ff
-  hi luaInspectLocalMutated gui=italic guifg=#000080
-  hi luaInspectUpValue guifg=#0000ff
-  hi luaInspectParam guifg=#000040
-  hi luaInspectLocal guifg=#000080
-  hi luaInspectFieldDefined guifg=#600000
-  hi luaInspectFieldUndefined guifg=#c00000
+endfunction
+
+function! s:LoadDefaultStyles()
+  " Always define the default highlighting styles
+  " (copied from /luainspect/scite.lua for consistency).
   " TODO Consider the &background?
+  highlight luaInspectDefGlobalDefined guifg=#600000
+  highlight luaInspectDefLocalUnused guifg=#ffffff guibg=#0000ff
+  highlight luaInspectDefLocalMutated gui=italic guifg=#000080
+  highlight luaInspectDefUpValue guifg=#0000ff
+  highlight luaInspectDefParam guifg=#000040
+  highlight luaInspectDefLocal guifg=#000080
+  highlight luaInspectDefFieldDefined guifg=#600000
+  highlight luaInspectDefFieldUndefined guifg=#c00000
+  " Don't link the actual highlighting styles to the defaults if the user
+  " has already defined or linked the highlighting group. This enables color
+  " schemes and vimrc scripts to override the styles (see :help :hi-default).
+  highlight def link luaInspectGlobalDefined luaInspectDefGlobalDefined
+  highlight def link luaInspectGlobalUndefined Error
+  highlight def link luaInspectLocalUnused luaInspectDefLocalUnused
+  highlight def link luaInspectLocalMutated luaInspectDefLocalMutated
+  highlight def link luaInspectUpValue luaInspectDefUpValue
+  highlight def link luaInspectParam luaInspectDefParam
+  highlight def link luaInspectLocal luaInspectDefLocal
+  highlight def link luaInspectFieldDefined luaInspectDefFieldDefined
+  highlight def link luaInspectFieldUndefined luaInspectDefFieldUndefined
 endfunction
 
 " vim: ts=2 sw=2 et

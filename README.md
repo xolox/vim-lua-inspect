@@ -16,17 +16,19 @@ When you open any Lua file the semantic highlighting should be enabled automatic
 
 ### The `:LuaInspect` command
 
-You shouldn't need to execute this command manually unless you've disabled automatic highlighting using the `g:lua_inspect_automatic` option. When you execute the `:LuaInspect` command the plug-in runs LuaInspect and then highlights all variables in the current buffer using one of the following highlighting groups:
+You shouldn't need to execute this command manually unless you've disabled automatic highlighting using the `g:lua_inspect_automatic` option. When you execute the `:LuaInspect` command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
 
- * `luaInspectGlobalDefined`
- * `luaInspectGlobalUndefined`
- * `luaInspectLocalUnused`
- * `luaInspectLocalMutated`
- * `luaInspectUpValue`
- * `luaInspectParam`
- * `luaInspectLocal`
- * `luaInspectFieldDefined`
- * `luaInspectFieldUndefined`
+ * <span style="color: #600000">luaInspectGlobalDefined</span>
+ * <span style="color: #FFF; background: #F00">luaInspectGlobalUndefined</span>
+ * <span style="color: #FFF; background: #00F">luaInspectLocalUnused</span>
+ * <span style="color: #000080; font-style: italic">luaInspectLocalMutated</span>
+ * <span style="color: #00F">luaInspectUpValue</span>
+ * <span style="color: #000040">luaInspectParam</span>
+ * <span style="color: #000080">luaInspectLocal</span>
+ * <span style="color: #600000">luaInspectFieldDefined</span>
+ * <span style="color: #C00000">luaInspectFieldUndefined</span>
+
+If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default).
 
 ### The `g:lua_inspect_automatic` option
 
