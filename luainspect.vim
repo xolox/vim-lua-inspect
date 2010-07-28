@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 27, 2010
+" Last Change: July 28, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " Version: 0.1.3
 
@@ -35,7 +35,7 @@ augroup END
 " Script local functions. {{{1
 
 function! s:AutoEnable()
-  if &filetype == 'lua'
+  if &ft == 'lua' && !&diff
     LuaInspect
   end
 endfunction
