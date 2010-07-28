@@ -63,7 +63,7 @@ EOF
   " Highlight variables in buffer based on positions.
   for fields in split(listing, "\n")
     let [type, lnum, start, end] = split(fields)
-    let command = 'syntax match %s /\%%%il\%%>%ic.\+\%%<%ic/'
+    let command = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
     execute printf(command, type, lnum, start - 1, end + 2)
   endfor
 endfunction
