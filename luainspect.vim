@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: July 28, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.3
+" Version: 0.1.4
 
 " Configuration defaults. {{{1
 

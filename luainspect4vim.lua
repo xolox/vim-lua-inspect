@@ -8,33 +8,18 @@
 
 --]]
 
-local function offset2lineinfo(text, offset)
-  -- TODO Cache intermediate results because they won't change within a single
-  --      call to the function returned from this module below.
-  local curlnum = 1
-  local lastlineoffset = 0
-  for i in text:gmatch '()\n' do
-    if i >= offset then break end
-    curlnum = curlnum + 1
-    lastlineoffset = i
-  end
-  return curlnum, offset - lastlineoffset
-end
-
 local dumpvar
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
-  dumpvar = function(text, kind, firstbyte, lastbyte)
-    local line1, offset1 = offset2lineinfo(text, firstbyte)
-    print(kind, line1, offset1, offset1 + (lastbyte - firstbyte))
+  dumpvar = function(kind, lnum, firstcol, lastcol)
+    print(kind, lnum, firstcol, lastcol)
   end
 else
   -- My $LUA_INIT script redefines print() to enable pretty printing in the
   -- interactive prompt, which means strings are printed with surrounding
   -- quotes. This would break the communication between Vim and this script.
-  dumpvar = function(text, kind, firstbyte, lastbyte)
-    local line1, offset1 = offset2lineinfo(text, firstbyte)
-    io.write(kind, '\t', line1, '\t', offset1, '\t', offset1 + (lastbyte - firstbyte), '\n')
+  dumpvar = function(kind, lnum, firstcol, lastcol)
+    io.write(kind, '\t', lnum, '\t', firstcol, '\t', lastcol, '\n')
   end
 end
 
@@ -72,7 +57,11 @@ return function(text)
         kind = 'luaInspectFieldUndefined'
       end
     end
-    if kind then dumpvar(text, kind, note[1], note[2]) end
+    if kind then
+      local l1, c1 = unpack(note.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(note.ast.lineinfo.last, 1, 2)
+      if l1 == l2 then dumpvar(kind, l1, c1, c2) end
+    end
   end
 end
 
