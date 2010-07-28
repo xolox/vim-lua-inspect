@@ -36,9 +36,9 @@ By default semantic highlighting is automatically enabled after a short timeout 
 
     :let g:lua_inspect_events = ''
 
-You can also add events, e.g.:
+You can also add events, for example if you also want to run `:LuaInspect` the moment you edit a Lua file then try this:
 
-    :let g:lua_inspect_events = 'CursorHold,CursorHoldI,InsertLeave'
+    :let g:lua_inspect_events = 'CursorHold,CursorHoldI,BufReadPost,BufWritePost'
 
 Note that this only works when the plug-in is loaded (or reloaded) *after* setting the `g:lua_inspect_events` option.
 
