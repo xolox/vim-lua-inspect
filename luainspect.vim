@@ -97,7 +97,7 @@ function! s:LoadDefaultStyles()
   " has already defined or linked the highlighting group. This enables color
   " schemes and vimrc scripts to override the styles (see :help :hi-default).
   highlight def link luaInspectGlobalDefined luaInspectDefGlobalDefined
-  highlight def link luaInspectGlobalUndefined Error
+  highlight def link luaInspectGlobalUndefined ErrorMsg
   highlight def link luaInspectLocalUnused luaInspectDefLocalUnused
   highlight def link luaInspectLocalMutated luaInspectDefLocalMutated
   highlight def link luaInspectUpValue luaInspectDefUpValue
