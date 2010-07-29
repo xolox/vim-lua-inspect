@@ -1,8 +1,8 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 28, 2010
+" Last Change: July 29, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.4
+" Version: 0.1.5
 
 " Configuration defaults. {{{1
 
@@ -40,8 +40,11 @@ function! s:AutoEnable()
   end
 endfunction
 
-function! s:RunLuaInspect()
-  let l:text = join(getline(1, "$"), "\n")
+function! s:RunLuaInspect() abort
+  let lines = getline(1, "$")
+  call insert(lines, col('.'))
+  call insert(lines, line('.'))
+  let l:text = join(lines, "\n")
   if has('lua') && g:lua_inspect_internal
     " Run LuaInspect using the Lua interface for Vim.
     redir => listing
@@ -79,6 +82,7 @@ function! s:ClearPreviousMatches()
   if hlexists('luaInspectLocal') | syntax clear luaInspectLocal | endif
   if hlexists('luaInspectFieldDefined') | syntax clear luaInspectFieldDefined | endif
   if hlexists('luaInspectFieldUndefined') | syntax clear luaInspectFieldUndefined | endif
+  if hlexists('luaInspectSelectedVariable') | syntax clear luaInspectSelectedVariable | endif
 endfunction
 
 function! s:LoadDefaultStyles()
@@ -105,6 +109,7 @@ function! s:LoadDefaultStyles()
   highlight def link luaInspectLocal luaInspectDefLocal
   highlight def link luaInspectFieldDefined luaInspectDefFieldDefined
   highlight def link luaInspectFieldUndefined luaInspectDefFieldUndefined
+  highlight def link luaInspectSelectedVariable Folded
 endfunction
 
 " vim: ts=2 sw=2 et

@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: July 28, 2010
+ Last Change: July 29, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
 
 --]]
@@ -23,16 +23,36 @@ else
   end
 end
 
+local function getcurvar(notes, line, column)
+  for i, note in ipairs(notes) do
+    if note.ast.lineinfo then
+      local l1, c1 = unpack(note.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(note.ast.lineinfo.last, 1, 2)
+      if l1 == line and column >= c1 and column <= c2 then
+        if note.ast.id then return note end
+      end
+    end
+  end
+end
+
 return function(text)
   local LI = require 'luainspect.init'
+  -- Split input into current position and source text.
+  local line, column, text = text:match '^(%d+)\n(%d+)\n(.*)$'
+  line = tonumber(line)
+  column = tonumber(column)
   text = LI.remove_shebang(text)
   local f, err, linenum, colnum, linenum2 = LI.loadstring(text)
-  if not f then return end
+  if not f then return end -- TODO Highlight syntax errors like spelling errors
   local ast; ast, err, linenum, colnum, linenum2 = LI.ast_from_string(text, "noname.lua")
   if not ast then return end
-  for i, note in ipairs(LI.inspect(ast)) do
+  local notes = LI.inspect(ast)
+  local curvar = getcurvar(notes, line, column)
+  for i, note in ipairs(notes) do
     local kind
-    if note.type == 'global' then
+    if curvar and curvar.ast.id == note.ast.id then
+      kind = 'luaInspectSelectedVariable'
+    elseif note.type == 'global' then
       if note.definedglobal then
         kind = 'luaInspectGlobalDefined'
       else
