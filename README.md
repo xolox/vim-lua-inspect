@@ -27,6 +27,7 @@ You shouldn't need to execute this command manually unless you've disabled autom
  * <span style="color: #000080">luaInspectLocal</span>
  * <span style="color: #600000">luaInspectFieldDefined</span>
  * <span style="color: #C00000">luaInspectFieldUndefined</span>
+ * <span style="background: #D3D3D3">luaInspectSelectedVariable</span>
 
 If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default).
 
