@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.7
+" Version: 0.1.8
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
@@ -24,6 +24,19 @@ if !exists('g:lua_inspect_internal')
   " undefined globals...
   let g:lua_inspect_internal = 0
 endif
+
+" The highlight groups and default styles/links defined by this plug-in.
+let s:groups = {}
+let s:groups['GlobalDefined'] = 'guifg=#600000'
+let s:groups['GlobalUndefined'] = 'ErrorMsg'
+let s:groups['LocalUnused'] = 'guifg=#ffffff guibg=#0000ff'
+let s:groups['LocalMutated'] = 'gui=italic guifg=#000080'
+let s:groups['UpValue'] = 'guifg=#0000ff'
+let s:groups['Param'] = 'guifg=#000040'
+let s:groups['Local'] = 'guifg=#000080'
+let s:groups['FieldDefined'] = 'guifg=#600000'
+let s:groups['FieldUndefined'] = 'guifg=#c00000'
+let s:groups['SelectedVariable'] = 'Folded'
 
 " (Automatic) command definitions. {{{1
 
@@ -99,43 +112,30 @@ endfunction
 
 function! s:ClearPreviousMatches() " {{{2
   " Clear existing highlighting.
-  if hlexists('luaInspectGlobalDefined') | syntax clear luaInspectGlobalDefined | endif
-  if hlexists('luaInspectGlobalUndefined') | syntax clear luaInspectGlobalUndefined | endif
-  if hlexists('luaInspectLocalUnused') | syntax clear luaInspectLocalUnused | endif
-  if hlexists('luaInspectLocalMutated') | syntax clear luaInspectLocalMutated | endif
-  if hlexists('luaInspectUpValue') | syntax clear luaInspectUpValue | endif
-  if hlexists('luaInspectParam') | syntax clear luaInspectParam | endif
-  if hlexists('luaInspectLocal') | syntax clear luaInspectLocal | endif
-  if hlexists('luaInspectFieldDefined') | syntax clear luaInspectFieldDefined | endif
-  if hlexists('luaInspectFieldUndefined') | syntax clear luaInspectFieldUndefined | endif
-  if hlexists('luaInspectSelectedVariable') | syntax clear luaInspectSelectedVariable | endif
+  for group in keys(s:groups)
+    let group = 'luaInspect' . group
+    if hlexists(group)
+      execute 'syntax clear' group
+    endif
+  endfor
 endfunction
 
 function! s:LoadDefaultStyles() " {{{2
   " Always define the default highlighting styles
   " (copied from /luainspect/scite.lua for consistency).
   " TODO Consider the &background?
-  highlight luaInspectDefGlobalDefined guifg=#600000
-  highlight luaInspectDefLocalUnused guifg=#ffffff guibg=#0000ff
-  highlight luaInspectDefLocalMutated gui=italic guifg=#000080
-  highlight luaInspectDefUpValue guifg=#0000ff
-  highlight luaInspectDefParam guifg=#000040
-  highlight luaInspectDefLocal guifg=#000080
-  highlight luaInspectDefFieldDefined guifg=#600000
-  highlight luaInspectDefFieldUndefined guifg=#c00000
-  " Don't link the actual highlighting styles to the defaults if the user
-  " has already defined or linked the highlighting group. This enables color
-  " schemes and vimrc scripts to override the styles (see :help :hi-default).
-  highlight def link luaInspectGlobalDefined luaInspectDefGlobalDefined
-  highlight def link luaInspectGlobalUndefined ErrorMsg
-  highlight def link luaInspectLocalUnused luaInspectDefLocalUnused
-  highlight def link luaInspectLocalMutated luaInspectDefLocalMutated
-  highlight def link luaInspectUpValue luaInspectDefUpValue
-  highlight def link luaInspectParam luaInspectDefParam
-  highlight def link luaInspectLocal luaInspectDefLocal
-  highlight def link luaInspectFieldDefined luaInspectDefFieldDefined
-  highlight def link luaInspectFieldUndefined luaInspectDefFieldUndefined
-  highlight def link luaInspectSelectedVariable Folded
+  for [group, style] in items(s:groups)
+    let defgroup = style
+    let group = 'luaInspect' . group
+    if match(style, '=') >= 0
+      let defgroup = 'luaInspectDefault' . group
+      execute 'highlight' defgroup style
+    endif
+    " Don't link the actual highlighting styles to the defaults if the user
+    " has already defined or linked the highlighting group. This enables color
+    " schemes and vimrc scripts to override the styles (see :help :hi-default).
+    execute 'highlight def link' group defgroup
+  endfor
 endfunction
 
 " }}}1
