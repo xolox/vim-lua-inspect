@@ -2,6 +2,8 @@
 
 The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki/LuaInspect) tool to (automatically) perform semantic highlighting of variables in Lua source code. It was inspired by [lua2-mode](http://www.enyo.de/fw/software/lua-emacs/lua2-mode.html) (for [Emacs](http://www.gnu.org/software/emacs/)) and the [SciTE](http://www.scintilla.org/SciTE.html) plug-in included with LuaInspect.
 
+![Screenshot of semantic highlighting](http://peterodding.com/code/vim/luainspect/screenshot.png)
+
 ## Installation
 
 1. Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/lua-inspect) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows) and move or symlink the file `luainspect4vim.lua` somewhere where Lua's `require()` function can find it.

@@ -1,8 +1,8 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 7, 2010
+" Last Change: August 8, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.2
+" Version: 0.2.1
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
@@ -100,7 +100,7 @@ EOF
   " Highlight variables in buffer based on positions.
   let did_warning = 0
   for line in split(b:luainspect_output, "\n")
-    let fields = split(line, "\t")
+    let fields = split(line)
     if len(fields) != 4
       if !did_warning
         try
