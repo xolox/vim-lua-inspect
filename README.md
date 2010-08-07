@@ -31,6 +31,14 @@ You don't need to use this command unless you've disabled automatic highlighting
 
 If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default).
 
+If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
+
+### The `g:loaded_luainspect` option
+
+This variable isn't really an option but if you want to avoid loading the `luainspect.vim` plug-in you can set this variable to any value in your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
+
+    :let g:loaded_luainspect = 1
+
 ### The `g:lua_inspect_events` option
 
 By default semantic highlighting is automatically enabled after a short timeout and when you save a buffer. If you want to disable automatic highlighting altogether add the following to your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):

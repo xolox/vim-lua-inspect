@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.9
+" Version: 0.2
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
@@ -42,7 +42,7 @@ let s:groups['SelectedVariable'] = 'Folded'
 
 " (Automatic) command definitions. {{{1
 
-command! LuaInspect call s:RunLuaInspect()
+command! -bar -bang LuaInspect call s:RunLuaInspect(<q-bang> == '!')
 
 augroup PluginLuaInspect
   " Clear existing automatic commands.
@@ -56,12 +56,20 @@ augroup END
 " Script local functions. {{{1
 
 function! s:AutoEnable() " {{{2
-  if &ft == 'lua' && !&diff
+  if &ft == 'lua' && !&diff && !exists('b:luainspect_disabled')
     LuaInspect
   end
 endfunction
 
-function! s:RunLuaInspect() " {{{2
+function! s:RunLuaInspect(disable) " {{{2
+  if a:disable
+    call s:ClearPreviousMatches()
+    unlet! b:luainspect_input b:luainspect_output
+    let b:luainspect_disabled = 1
+    return
+  else
+    unlet! b:luainspect_disabled
+  endif
   let lines = getline(1, "$")
   call insert(lines, col('.'))
   call insert(lines, line('.'))
