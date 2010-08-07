@@ -2,7 +2,8 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.5
+" Version: 0.1.6
+" License: MIT
 
 " Configuration defaults. {{{1
 
@@ -69,10 +70,25 @@ EOF
   call s:LoadDefaultStyles()
   call s:ClearPreviousMatches()
   " Highlight variables in buffer based on positions.
-  for fields in split(b:luainspect_output, "\n")
-    let [type, lnum, start, end] = split(fields)
-    let command = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
-    execute printf(command, type, lnum, start - 1, end + 2)
+  let did_warning = 0
+  for line in split(b:luainspect_output, "\n")
+    let fields = split(line, "\t")
+    if len(fields) != 4
+      if !did_warning
+        try
+          echohl WarningMsg
+          echomsg "Invalid output from luainspect4vim.lua:"
+        finally
+          echohl None
+          let did_warning = 1
+        endtry
+      endif
+      echomsg strtrans(line)
+    else
+      let [type, lnum, start, end] = fields
+      let command = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
+      execute printf(command, type, lnum, start - 1, end + 2)
+    endif
   endfor
 endfunction
 

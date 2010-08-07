@@ -3,8 +3,9 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: July 29, 2010
+ Last Change: August 7, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
+ License: MIT
 
 --]]
 
@@ -23,66 +24,77 @@ else
   end
 end
 
-local function getcurvar(notes, line, column)
-  for i, note in ipairs(notes) do
-    if note.ast.lineinfo then
-      local l1, c1 = unpack(note.ast.lineinfo.first, 1, 2)
-      local l2, c2 = unpack(note.ast.lineinfo.last, 1, 2)
+local function getcurvar(tokenlist, line, column)
+  for i, token in ipairs(tokenlist) do
+    if token.ast.lineinfo then
+      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
       if l1 == line and column >= c1 and column <= c2 then
-        if note.ast.id then return note end
+        if token.ast.id then return token end
       end
     end
   end
 end
 
-return function(text)
+return function(src)
   local LI = require 'luainspect.init'
+  local LA = require 'luainspect.ast'
   -- Split input into current position and source text.
-  local line, column, text = text:match '^(%d+)\n(%d+)\n(.*)$'
+  local line, column, src = src:match '^(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
   column = tonumber(column)
-  text = LI.remove_shebang(text)
-  local f, err, linenum, colnum, linenum2 = LI.loadstring(text)
+  src = LA.remove_shebang(src)
+  local f, err, linenum, colnum, linenum2 = LA.loadstring(src)
   if not f then return end -- TODO Highlight syntax errors like spelling errors
-  local ast; ast, err, linenum, colnum, linenum2 = LI.ast_from_string(text, "noname.lua")
+  -- FIXME ast_from_string() references editor.LineCount
+  local numlines = 1
+  for _ in src:gmatch '\n' do numlines = numlines + 1 end
+  local editor_save = _G.editor
+  _G.editor = { lineCount = numlines }
+  local ast; ast, err, linenum, colnum, linenum2 = LA.ast_from_string(src, "noname.lua")
+  _G.editor = editor_save
   if not ast then return end
-  local notes = LI.inspect(ast)
-  local curvar = getcurvar(notes, line, column)
-  for i, note in ipairs(notes) do
+  local tokenlist = LA.ast_to_tokenlist(ast, src)
+  LI.inspect(ast, tokenlist)
+  local curvar = getcurvar(tokenlist, line, column)
+  for i, token in ipairs(tokenlist) do
     local kind
-    if curvar and curvar.ast.id == note.ast.id then
+    if curvar and curvar.ast.id == token.ast.id then
       kind = 'luaInspectSelectedVariable'
-    elseif note.type == 'global' then
-      if note.definedglobal then
-        kind = 'luaInspectGlobalDefined'
-      else
-        kind = 'luaInspectGlobalUndefined'
-      end
-    elseif note.type == 'local' then
-      if not note.ast.localdefinition.isused then
+    elseif token.tag == 'Id' then
+      if not token.ast.localdefinition then
+        if token.ast.definedglobal then
+          kind = 'luaInspectGlobalDefined'
+        else
+          kind = 'luaInspectGlobalUndefined'
+        end
+      elseif not token.ast.localdefinition.isused then
         kind = 'luaInspectLocalUnused'
-      elseif note.ast.localdefinition.isset then
-        kind = 'luaInspectLocalMutated'
-      elseif note.ast.localdefinition.functionlevel  < note.ast.functionlevel then
+      elseif token.ast.localdefinition.functionlevel < token.ast.functionlevel then
         kind = 'luaInspectUpValue'
-      elseif note.ast.localdefinition.isparam then
+      elseif token.ast.localdefinition.isset then
+        kind = 'luaInspectLocalMutated'
+      elseif token.ast.localdefinition.isparam then
         kind = 'luaInspectParam'
       else
         kind = 'luaInspectLocal'
       end
-    elseif note.type == 'field' then
-      if note.definedglobal or note.ast.seevalue.value ~= nil then
+    elseif token.ast.isfield then
+      if token.ast.definedglobal or token.ast.seevalue.valueknown and token.ast.seevalue.value ~= nil then
         kind = 'luaInspectFieldDefined'
       else
         kind = 'luaInspectFieldUndefined'
       end
     end
     if kind then
-      local l1, c1 = unpack(note.ast.lineinfo.first, 1, 2)
-      local l2, c2 = unpack(note.ast.lineinfo.last, 1, 2)
+      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
       if l1 == l2 then dumpvar(kind, l1, c1, c2) end
     end
   end
 end
+
+-- Enable type checking of ast.* expressions.
+--! require 'luainspect.typecheck' (context)
 
 -- vim: ts=2 sw=2 et
