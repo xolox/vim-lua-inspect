@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.8
+" Version: 0.1.9
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
@@ -18,11 +18,13 @@ if !exists('g:lua_inspect_events')
 endif
 
 if !exists('g:lua_inspect_internal')
-  " Set this to false (0) to run LuaInspect inside the Lua interface for Vim.
-  " This makes it faster but less accurate because the Lua interface for Vim
-  " doesn't include io.* and half of os.* which means LuaInspect marks them as
-  " undefined globals...
-  let g:lua_inspect_internal = 0
+  " Set this to false (0) to run LuaInspect as an external process instead of
+  " using the Lua interface for Vim. This makes it slower but might make it
+  " more accurate because the Lua interface for Vim didn't include io.* and
+  " os.* before the patch posted on 2010-07-28 which means LuaInspect would
+  " mark them as undefined globals. The patch I'm referring to is:
+  " http://groups.google.com/group/vim_dev/browse_frm/thread/9b77afa2fe4336c8
+  let g:lua_inspect_internal = has('lua')
 endif
 
 " The highlight groups and default styles/links defined by this plug-in.

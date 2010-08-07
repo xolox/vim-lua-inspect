@@ -16,7 +16,7 @@ When you open any Lua file the semantic highlighting should be enabled automatic
 
 ### The `:LuaInspect` command
 
-You shouldn't need to execute this command manually unless you've disabled automatic highlighting using the `g:lua_inspect_events` option. When you execute the `:LuaInspect` command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
+You don't need to use this command unless you've disabled automatic highlighting using `g:lua_inspect_events`. When you execute this command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
 
  * <span style="color: #600000">luaInspectGlobalDefined</span>
  * <span style="color: #FFF; background: #F00">luaInspectGlobalUndefined</span>
@@ -45,9 +45,9 @@ Note that this only works when the plug-in is loaded (or reloaded) *after* setti
 
 ### The `g:lua_inspect_internal` option
 
-The plug-in can use the Lua interface for Vim so it doesn't have to run LuaInspect as an external program (which can slow things down). This feature isn't enabled by default though, because the Lua interface for Vim doesn't include most of `io.*` and `os.*` from Lua's standard library, and this causes LuaInspect to flag all references to those modules as undefined global variables! If you want to enable use of the Lua interface for Vim despite this, you can add the following to your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
+The plug-in uses the Lua interface for Vim when available so that it doesn't have to run LuaInspect as an external program (which can slow things down). If you insist on running LuaInspect as an external program you can set this variable to false (0) in your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
 
-    :let g:lua_inspect_internal = 1
+    :let g:lua_inspect_internal = 0
 
 ## Not yet implemented
 
