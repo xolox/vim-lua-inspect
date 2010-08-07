@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 29, 2010
+" Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " Version: 0.1.5
 
@@ -44,27 +44,32 @@ function! s:RunLuaInspect() abort
   let lines = getline(1, "$")
   call insert(lines, col('.'))
   call insert(lines, line('.'))
-  let l:text = join(lines, "\n")
-  if has('lua') && g:lua_inspect_internal
-    " Run LuaInspect using the Lua interface for Vim.
-    redir => listing
-    silent lua << EOF
-    if io == nil then
-      -- The Lua interface for Vim doesn't include io.*!
-      io = { type = function() end }
-    end
-    require 'luainspect4vim' (vim.eval 'l:text')
+  let l:input = join(lines, "\n")
+  " Don't parse the text when it hasn't been changed.
+  if !(exists('b:luainspect_input') && b:luainspect_input == l:input)
+    if !(has('lua') && g:lua_inspect_internal)
+      " Run LuaInspect as an external program.
+      let b:luainspect_output = system("lua -e 'require\"luainspect4vim\" (io.read \"*a\")'", l:input)
+    else
+      " Run LuaInspect using the Lua interface for Vim.
+      redir => b:luainspect_output
+      silent lua << EOF
+      if io == nil then
+        -- The Lua interface for Vim previously didn't include io.*!
+        io = { type = function() end }
+      end
+      require 'luainspect4vim' (vim.eval 'l:input')
 EOF
-    redir END
-  else
-    " Run LuaInspect as an external program.
-    let listing = system("lua -e 'require\"luainspect4vim\" (io.read \"*a\")'", l:text)
+      redir END
+    endif
+    " Remember the text that was just parsed.
+    let b:luainspect_input = l:input
   endif
   " Clear previously created highlighting.
   call s:LoadDefaultStyles()
   call s:ClearPreviousMatches()
   " Highlight variables in buffer based on positions.
-  for fields in split(listing, "\n")
+  for fields in split(b:luainspect_output, "\n")
     let [type, lnum, start, end] = split(fields)
     let command = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
     execute printf(command, type, lnum, start - 1, end + 2)
