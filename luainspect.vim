@@ -2,8 +2,13 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 7, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.1.6
+" Version: 0.1.7
 " License: MIT
+
+" Don't source the plug-in when its already been loaded or &compatible is set.
+if &cp || exists('g:loaded_luainspect')
+  finish
+endif
 
 " Configuration defaults. {{{1
 
@@ -35,13 +40,13 @@ augroup END
 
 " Script local functions. {{{1
 
-function! s:AutoEnable()
+function! s:AutoEnable() " {{{2
   if &ft == 'lua' && !&diff
     LuaInspect
   end
 endfunction
 
-function! s:RunLuaInspect() abort
+function! s:RunLuaInspect() " {{{2
   let lines = getline(1, "$")
   call insert(lines, col('.'))
   call insert(lines, line('.'))
@@ -92,7 +97,7 @@ EOF
   endfor
 endfunction
 
-function! s:ClearPreviousMatches()
+function! s:ClearPreviousMatches() " {{{2
   " Clear existing highlighting.
   if hlexists('luaInspectGlobalDefined') | syntax clear luaInspectGlobalDefined | endif
   if hlexists('luaInspectGlobalUndefined') | syntax clear luaInspectGlobalUndefined | endif
@@ -106,7 +111,7 @@ function! s:ClearPreviousMatches()
   if hlexists('luaInspectSelectedVariable') | syntax clear luaInspectSelectedVariable | endif
 endfunction
 
-function! s:LoadDefaultStyles()
+function! s:LoadDefaultStyles() " {{{2
   " Always define the default highlighting styles
   " (copied from /luainspect/scite.lua for consistency).
   " TODO Consider the &background?
@@ -132,5 +137,10 @@ function! s:LoadDefaultStyles()
   highlight def link luaInspectFieldUndefined luaInspectDefFieldUndefined
   highlight def link luaInspectSelectedVariable Folded
 endfunction
+
+" }}}1
+
+" Make sure the plug-in is only loaded once.
+let g:loaded_luainspect = 1
 
 " vim: ts=2 sw=2 et
