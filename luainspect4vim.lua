@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 7, 2010
+ Last Change: August 10, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -46,13 +46,7 @@ return function(src)
   src = LA.remove_shebang(src)
   local f, err, linenum, colnum, linenum2 = LA.loadstring(src)
   if not f then return end -- TODO Highlight syntax errors like spelling errors
-  -- FIXME ast_from_string() references editor.LineCount
-  local numlines = 1
-  for _ in src:gmatch '\n' do numlines = numlines + 1 end
-  local editor_save = _G.editor
-  _G.editor = { lineCount = numlines }
   local ast; ast, err, linenum, colnum, linenum2 = LA.ast_from_string(src, "noname.lua")
-  _G.editor = editor_save
   if not ast then return end
   local tokenlist = LA.ast_to_tokenlist(ast, src)
   LI.inspect(ast, tokenlist)

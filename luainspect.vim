@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 8, 2010
+" Last Change: August 10, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " Version: 0.2.1
 " License: MIT
@@ -46,19 +46,19 @@ command! -bar -bang LuaInspect call s:RunLuaInspect(<q-bang> == '!')
 
 augroup PluginLuaInspect
   " Clear existing automatic commands.
-  autocmd! 
+  autocmd!
+  " Disable easytags.vim because it doesn't play nice with luainspect.vim!
+  autocmd BufReadPost * if s:IsEnabled() | let b:easytags_nohl = 1 | endif
   " Define the configured automatic commands.
   for s:event in split(g:lua_inspect_events, ',')
-    execute 'autocmd' s:event '* call s:AutoEnable()'
+    execute 'autocmd' s:event '* if s:IsEnabled() | LuaInspect | endif'
   endfor
 augroup END
 
 " Script local functions. {{{1
 
-function! s:AutoEnable() " {{{2
-  if &ft == 'lua' && !&diff && !exists('b:luainspect_disabled')
-    LuaInspect
-  end
+function! s:IsEnabled()
+  return &ft == 'lua' && !&diff && !exists('b:luainspect_disabled')
 endfunction
 
 function! s:RunLuaInspect(disable) " {{{2
@@ -78,7 +78,7 @@ function! s:RunLuaInspect(disable) " {{{2
   if !(exists('b:luainspect_input') && b:luainspect_input == l:input)
     if !(has('lua') && g:lua_inspect_internal)
       " Run LuaInspect as an external program.
-      let b:luainspect_output = system("lua -e 'require\"luainspect4vim\" (io.read \"*a\")'", l:input)
+      let b:luainspect_output = system('lua -e "require ''luainspect4vim'' (io.read ''*a'')"', l:input)
     else
       " Run LuaInspect using the Lua interface for Vim.
       redir => b:luainspect_output
