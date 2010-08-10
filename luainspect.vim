@@ -111,9 +111,19 @@ function! s:parse_text(input, search_path) " {{{2
   if !(exists('b:luainspect_input') && b:luainspect_input == a:input)
     if !(has('lua') && g:lua_inspect_internal)
       let template = 'lua -e "%s; require ''luainspect4vim'' (io.read ''*a'')"'
-      let b:luainspect_output = system(printf(template, a:search_path), a:input)
+      let command = printf(template, a:search_path)
+      try
+        let b:luainspect_output = xolox#shell#execute(command, 1, a:input)
+      catch /^Vim\%((\a\+)\)\=:E117/
+        " Ignore missing shell.vim plug-in.
+        let b:luainspect_output = split(system(command, a:input), "\n")
+        if v:shell_error
+          let msg = "Failed to execute lua-inspect as external process! %s"
+          throw printf(msg, strtrans(join(b:luainspect_output, "\n")))
+        endif
+      endtry
     else
-      redir => b:luainspect_output
+      redir => output
       silent lua << EOF
       if io == nil then
         -- The Lua interface for Vim previously didn't include io.*!
@@ -122,6 +132,7 @@ function! s:parse_text(input, search_path) " {{{2
       require 'luainspect4vim' (vim.eval 'a:input')
 EOF
       redir END
+      let b:luainspect_output = split(output, "\n")
     endif
     " Remember the text that was just parsed.
     let b:luainspect_input = a:input
@@ -158,7 +169,7 @@ endfunction
 
 function! s:highlight_variables() " {{{2
   let did_warning = 0
-  for line in split(b:luainspect_output, "\n")
+  for line in b:luainspect_output
     if match(line, '^\w\+\(\s\+\d\+\)\{3}$') == -1
       if !did_warning
         try
