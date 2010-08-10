@@ -39,7 +39,6 @@ end
 return function(src)
   local LI = require 'luainspect.init'
   local LA = require 'luainspect.ast'
-  -- Split input into current position and source text.
   local line, column, src = src:match '^(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
   column = tonumber(column)

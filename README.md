@@ -6,11 +6,7 @@ The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki
 
 ## Installation
 
-1. Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/lua-inspect) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows) and move or symlink the file `luainspect4vim.lua` somewhere where Lua's `require()` function can find it.
-
-2. Download the latest [LuaInspect sources](http://github.com/davidm/lua-inspect/zipball/master) and unpack the contents of the `luainspectlib/` and `metalualib/` directories where Lua's `require()` function can find them.
-
-3. Restart Vim and edit any Lua file. Within a few seconds semantic highlighting should be enabled automatically.
+Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/lua-inspect) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit a Lua file and within a few seconds semantic highlighting should be enabled automatically!
 
 ## Usage
 
