@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 10, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.2.1
+" Version: 0.2.2
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
