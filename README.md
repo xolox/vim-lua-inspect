@@ -28,10 +28,9 @@ You don't need to use this command unless you've disabled automatic highlighting
  * <span style="color: #600000">luaInspectFieldDefined</span>
  * <span style="color: #C00000">luaInspectFieldUndefined</span>
  * <span style="background: #D3D3D3">luaInspectSelectedVariable</span>
+ * <span style="border-bottom: 1px dotted red">luaInspectSyntaxError</span>
 
-If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default).
-
-If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
+When a syntax error is found no highlighting can be performed but the lines where the error is reported will be marked like a spelling error. If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
 
 ### The `g:loaded_luainspect` option
 
@@ -56,14 +55,6 @@ Note that this only works when the plug-in is loaded (or reloaded) *after* setti
 The plug-in uses the Lua interface for Vim when available so that it doesn't have to run LuaInspect as an external program (which can slow things down). If you insist on running LuaInspect as an external program you can set this variable to false (0) in your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
 
     :let g:lua_inspect_internal = 0
-
-## Not yet implemented
-
- * When LuaInspect fails because of a syntax error the position of the error should be marked like e.g. spelling errors
-
- * Right now the highlighting styles used by `luainspect.vim` are the same as those used by the SciTE plug-in and they don't work well on dark backgrounds. As soon as I get around to picking some alternate colors I'll include those in the plug-in.
-
- * Bindings for other features of LuaInspect like renaming variables on command and showing tooltips for identifiers. This might be a lot of work but could prove to be really useful in making Lua easy to use in Vim.
 
 ## Contact
 

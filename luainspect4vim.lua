@@ -9,19 +9,15 @@
 
 --]]
 
-local dumpvar
+local myprint
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
-  dumpvar = function(kind, lnum, firstcol, lastcol)
-    print(kind, lnum, firstcol, lastcol)
-  end
+  myprint = print
 else
   -- My $LUA_INIT script redefines print() to enable pretty printing in the
   -- interactive prompt, which means strings are printed with surrounding
   -- quotes. This would break the communication between Vim and this script.
-  dumpvar = function(kind, lnum, firstcol, lastcol)
-    io.write(kind, '\t', lnum, '\t', firstcol, '\t', lastcol, '\n')
-  end
+  function myprint(text) io.write(text, '\n') end
 end
 
 local function getcurvar(tokenlist, line, column)
@@ -44,7 +40,14 @@ return function(src)
   column = tonumber(column)
   src = LA.remove_shebang(src)
   local f, err, linenum, colnum, linenum2 = LA.loadstring(src)
-  if not f then return end -- TODO Highlight syntax errors like spelling errors
+  if not f then
+    if not linenum2 then
+      myprint(linenum)
+    else
+      myprint(linenum2 .. ' ' .. linenum)
+    end
+    return
+  end
   local ast; ast, err, linenum, colnum, linenum2 = LA.ast_from_string(src, "noname.lua")
   if not ast then return end
   local tokenlist = LA.ast_to_tokenlist(ast, src)
@@ -82,7 +85,9 @@ return function(src)
     if kind then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
       local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
-      if l1 == l2 then dumpvar(kind, l1, c1, c2) end
+      if l1 == l2 then
+        myprint(kind .. ' ' .. l1 .. ' ' .. c1 .. ' ' .. c2)
+      end
     end
   end
 end

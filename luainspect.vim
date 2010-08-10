@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 10, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.2.2
+" Version: 0.2.3
 " License: MIT
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
@@ -48,6 +48,7 @@ let s:groups['Local'] = 'guifg=#000080'
 let s:groups['FieldDefined'] = 'guifg=#600000'
 let s:groups['FieldUndefined'] = 'guifg=#c00000'
 let s:groups['SelectedVariable'] = 'Folded'
+let s:groups['SyntaxError'] = 'SpellBad'
 
 " (Automatic) command definitions. {{{1
 
@@ -168,24 +169,23 @@ function! s:clear_previous_matches() " {{{2
 endfunction
 
 function! s:highlight_variables() " {{{2
-  let did_warning = 0
+  if len(b:luainspect_output) == 1
+    let line = b:luainspect_output[0]
+    let errinfo = matchlist(line, '^\(\d\+\)\s*\(\d*\)$')
+    if len(errinfo) >= 3
+      let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
+      execute printf(error_cmd, errinfo[1] - 1, (errinfo[2] != '' ? errinfo[2] : line('$')) + 1)
+      return
+    endif
+  endif
   for line in b:luainspect_output
     if match(line, '^\w\+\(\s\+\d\+\)\{3}$') == -1
-      if !did_warning
-        try
-          echohl WarningMsg
-          echomsg "Invalid output from luainspect4vim.lua:"
-        finally
-          echohl None
-          let did_warning = 1
-        endtry
-      endif
-      echomsg strtrans(line)
-    else
-      let [type, lnum, start, end] = split(line)
-      let syntax_cmd = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
-      execute printf(syntax_cmd, type, lnum, start - 1, end + 2)
+      call xolox#warning("Invalid output from luainspect4vim.lua: %s", strtrans(line))
+      return
     endif
+    let [type, lnum, start, end] = split(line)
+    let syntax_cmd = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
+    execute printf(syntax_cmd, type, lnum, start - 1, end + 2)
   endfor
 endfunction
 
