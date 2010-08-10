@@ -2,8 +2,11 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 10, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.2.3
+" Version: 0.2.4
 " License: MIT
+
+" Support for automatic update using the GLVS plug-in.
+" GetLatestVimScripts: 3169 1 :AutoInstall: luainspect.zip
 
 " Don't source the plug-in when its already been loaded or &compatible is set.
 if &cp || exists('g:loaded_luainspect')
