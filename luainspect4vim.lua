@@ -9,9 +9,12 @@
 
 --]]
 
+local MAX_PREVIEW_KEYS = 20
+
 local LI = require 'luainspect.init'
 local LA = require 'luainspect.ast'
-local actions, myprint, getcurvar = {}
+local LS = require 'luainspect.signatures'
+local actions, myprint, getcurvar, knownvarorfield = {}
 
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
@@ -33,6 +36,12 @@ function getcurvar(tokenlist, line, column)
       end
     end
   end
+end
+
+function knownvarorfield(token)
+  local a = token.ast
+  local v = a.seevalue or a
+  return a.definedglobal or v.valueknown and v.value ~= nil
 end
 
 function actions.highlight(tokenlist, line, column)
@@ -60,11 +69,7 @@ function actions.highlight(tokenlist, line, column)
         kind = 'luaInspectLocal'
       end
     elseif token.ast.isfield then
-      if token.ast.definedglobal or token.ast.seevalue.valueknown and token.ast.seevalue.value ~= nil then
-        kind = 'luaInspectFieldDefined'
-      else
-        kind = 'luaInspectFieldUndefined'
-      end
+      kind = knownvarorfield(token) and 'luaInspectFieldDefined' or 'luaInspectFieldUndefined'
     end
     if kind then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
@@ -72,6 +77,126 @@ function actions.highlight(tokenlist, line, column)
       if l1 == l2 then myprint(kind .. ' ' .. l1 .. ' ' .. c1 .. ' ' .. c2) end
     end
   end
+end
+
+function actions.tooltip(tokenlist, line, column)
+  local text = {}
+  local token = getcurvar(tokenlist, line, column)
+  if not token then return end
+  local ast = token.ast
+  if not ast then return end
+  -- Describe the variable type and status.
+  if ast.localdefinition then
+    if not ast.localdefinition.isused then text[#text+1] = "unused" end
+    if ast.localdefinition.isset then text[#text+1] = "mutable" end
+    if ast.localmasking then text[#text+1] = "masking" end
+    if ast.localmasked then text[#text+1] = "masked" end
+    if ast.localdefinition.functionlevel < ast.functionlevel then
+      text[#text+1] = "upvalue"
+    elseif ast.localdefinition.isparam then
+      text[#text+1]  = "function parameter"
+    else
+      text[#text+1] = "local variable"
+    end
+  elseif ast.tag == 'Id' then
+    text[#text+1] = knownvarorfield(token) and "known" or "unknown"
+    text[#text+1] = "global variable"
+  elseif ast.isfield then
+    text[#text+1] = knownvarorfield(token) and "known" or "unknown"
+    text[#text+1] = "table field"
+  else
+    return
+  end
+  -- TODO Bug in luainspect's static analysis? :gsub() below is marked as an
+  -- unknown table field even though table.concat() returns a string?!
+  text = table.concat(text, ' ')
+  myprint("This is " .. (text:find '^[aeiou]' and 'an' or 'a') .. ' ' .. text .. '.')
+  -- Display signatures for standard library functions.
+  local name = ast.resolvedname
+  local signature = name and LS.global_signatures[name]
+  if not signature then
+    local value = (ast.seevalue or ast).value
+    for name, sig in pairs(LS.global_signatures) do
+      if value == loadstring('return ' .. name)() then
+        signature = sig
+      end
+    end
+  end
+  if signature then
+    -- luainspect/signatures.lua contains special bullet characters in the
+    -- latin1 character encoding (according to Vim) which Vim doesn't like
+    -- in tooltips (I guess because it expects UTF-8).
+    signature = signature:gsub('\183', '.')
+    if not signature:find '%w %b()$' then
+      myprint 'Its description is:'
+      myprint('    ' .. signature)
+    else
+      myprint 'Its signature is as follows:'
+      myprint('    ' .. signature)
+    end
+  end
+  -- Try to represent the value as a string.
+  local value = (ast.seevalue or ast).value
+  if type(value) == 'table' then
+    -- Print at most MAX_PREVIEW_KEYS of the table's keys.
+    local keys = {}
+    for k, v in pairs(value) do
+      if type(k) == 'string' then
+        keys[#keys+1] = k
+      elseif type(k) == 'number' then
+        keys[#keys+1] = '[' .. k .. ']'
+      else
+        keys[#keys+1] = tostring(k)
+      end
+    end
+    table.sort(keys)
+    if #keys > MAX_PREVIEW_KEYS then
+      myprint('Its value is a table with ' .. #keys .. ' fields including:')
+      for i, k in ipairs(keys) do
+        myprint(' - ' .. k)
+        if i == MAX_PREVIEW_KEYS then break end
+      end
+    elseif #keys >= 1 then
+      myprint("Its value is a table with the following field" .. (#keys > 1 and "s" or '') .. ":")
+      for i, k in ipairs(keys) do myprint(' - ' .. k) end
+    else
+      myprint 'Its value is a table.'
+    end
+  elseif type(value) == 'string' then
+    -- Print string value.
+    if value ~= '' then
+      myprint("Its value is the string " .. string.format('%q', value) .. ".")
+    else
+      myprint "Its value is a string."
+    end
+  elseif type(value) == 'function' then
+    -- Print function details.
+    local text = { "Its value is a" }
+    local info = debug.getinfo(value)
+    text[#text+1] = info.what
+    text[#text+1] = "function"
+    -- Try to find out where the function was defined.
+    local source = (info.source or ''):match '^@(.+)$'
+    if source and not source:find '[\\/]+luainspect[\\/]+.-%.lua$' then
+      source = source:gsub('^/home/[^/]+/', '~/')
+      text[#text+1] = "defined in"
+      text[#text+1] = source
+      if info.linedefined then
+        text[#text+1] = "on line"
+        text[#text+1] = info.linedefined
+      end
+    end
+    myprint(table.concat(text, ' ') .. '.')
+  elseif type(value) == 'userdata' then
+    myprint("Its value is a " .. type(value) .. '.')
+  elseif value ~= nil then
+    myprint("Its value is the " .. type(value) .. ' ' .. tostring(value) .. '.')
+  end
+  --[[ TODO Print warning notes attached to function calls?
+  local vast = ast.seevalue or ast
+  local note = vast.parent and (vast.parent.tag == 'Call' or vast.parent.tag == 'Invoke') and vast.parent.note
+  if note then myprint("WARNING: " .. note) end
+  --]]
 end
 
 function actions.goto(tokenlist, line, column)

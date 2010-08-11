@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 11, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.2
+" Version: 0.3.3
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -80,14 +80,25 @@ function! s:init_lua_buffer()
     inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename', 0, 1)<CR>
     nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename', 0, 1)<CR>
     nnoremap <buffer> <silent> gd :call <Sid>run_lua_inspect('goto', 0, 1)<CR>
+    setlocal ballooneval balloonexpr=LuaInspectToolTip()
   endif
+endfunction
+
+function! LuaInspectToolTip() " {{{2
+  let text = s:run_lua_inspect('tooltip', 0, 1)
+  return type(text) == type('') ? text : ''
 endfunction
 
 function! s:run_lua_inspect(action, toggle, enabled) " {{{2
   if !a:toggle || s:set_plugin_enabled(a:enabled)
     let lines = getline(1, "$")
-    call insert(lines, col('.'))
-    call insert(lines, line('.'))
+    if a:action == 'tooltip'
+      call insert(lines, v:beval_col)
+      call insert(lines, v:beval_lnum)
+    else
+      call insert(lines, col('.'))
+      call insert(lines, line('.'))
+    endif
     call insert(lines, a:action)
     call s:parse_text(join(lines, "\n"), s:prepare_search_path())
     if !empty(b:luainspect_output)
@@ -113,6 +124,10 @@ function! s:run_lua_inspect(action, toggle, enabled) " {{{2
           let colnum = b:luainspect_output[2] + 0
           call setpos('.', [0, linenum, colnum, 0])
           call xolox#message("") " Clear any previous message to avoid confusion.
+        endif
+      elseif response == 'tooltip'
+        if len(b:luainspect_output) > 1
+          return join(b:luainspect_output[1:-1], "\n")
         endif
       elseif response == 'rename'
         if len(b:luainspect_output) == 1
