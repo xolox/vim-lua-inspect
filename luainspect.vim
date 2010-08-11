@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 12, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.4
+" Version: 0.3.5
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -50,7 +50,7 @@ let s:groups['Param'] = 'guifg=#000040'
 let s:groups['Local'] = 'guifg=#000080'
 let s:groups['FieldDefined'] = 'guifg=#600000'
 let s:groups['FieldUndefined'] = 'guifg=#c00000'
-let s:groups['SelectedVariable'] = 'Folded'
+let s:groups['SelectedVariable'] = 'CursorLine'
 let s:groups['SyntaxError'] = 'SpellBad'
 
 " (Automatic) command definitions. {{{1
@@ -232,11 +232,16 @@ function! s:clear_previous_matches() " {{{2
 endfunction
 
 function! s:highlight_variables() " {{{2
+  call clearmatches()
   for line in b:luainspect_output[1:-1]
     if s:check_output(line, '^\w\+\(\s\+\d\+\)\{3}$')
       let [hlgroup, linenum, firstcol, lastcol] = split(line)
       let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
-      execute 'syntax match' hlgroup '/' . pattern . '/'
+      if hlgroup == 'luaInspectSelectedVariable'
+        call matchadd(hlgroup, pattern)
+      else
+        execute 'syntax match' hlgroup '/' . pattern . '/'
+      endif
     endif
   endfor
 endfunction

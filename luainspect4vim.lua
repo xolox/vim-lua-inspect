@@ -47,10 +47,13 @@ end
 function actions.highlight(tokenlist, line, column)
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
-    local kind
     if curvar and curvar.ast.id == token.ast.id then
-      kind = 'luaInspectSelectedVariable'
-    elseif token.tag == 'Id' then
+      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
+      if l1 == l2 then myprint('luaInspectSelectedVariable ' .. l1 .. ' ' .. c1 .. ' ' .. c2) end
+    end
+    local kind
+    if token.tag == 'Id' then
       if not token.ast.localdefinition then
         if token.ast.definedglobal then
           kind = 'luaInspectGlobalDefined'
