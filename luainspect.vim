@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 11, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3
+" Version: 0.3.2
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -55,7 +55,7 @@ let s:groups['SyntaxError'] = 'SpellBad'
 
 " (Automatic) command definitions. {{{1
 
-command! -bar -bang LuaInspect call s:run_lua_inspect('highlight', <q-bang> != '!')
+command! -bar -bang LuaInspect call s:run_lua_inspect('highlight', 1, <q-bang> != '!')
 
 augroup PluginLuaInspect
   " Clear existing automatic commands.
@@ -77,13 +77,14 @@ endfunction
 function! s:init_lua_buffer()
   if s:check_plugin_enabled()
     let b:easytags_nohl = 1
-    inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename', 1)<CR>
-    nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename', 1)<CR>
+    inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename', 0, 1)<CR>
+    nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename', 0, 1)<CR>
+    nnoremap <buffer> <silent> gd :call <Sid>run_lua_inspect('goto', 0, 1)<CR>
   endif
 endfunction
 
-function! s:run_lua_inspect(action, enable) " {{{2
-  if s:set_plugin_enabled(a:enable)
+function! s:run_lua_inspect(action, toggle, enabled) " {{{2
+  if !a:toggle || s:set_plugin_enabled(a:enabled)
     let lines = getline(1, "$")
     call insert(lines, col('.'))
     call insert(lines, line('.'))
@@ -104,6 +105,15 @@ function! s:run_lua_inspect(action, enable) " {{{2
         call s:define_default_styles()
         call s:clear_previous_matches()
         call s:highlight_variables()
+      elseif response == 'goto'
+        if len(b:luainspect_output) < 3
+          call xolox#warning("No variable under cursor!")
+        else
+          let linenum = b:luainspect_output[1] + 0
+          let colnum = b:luainspect_output[2] + 0
+          call setpos('.', [0, linenum, colnum, 0])
+          call xolox#message("") " Clear any previous message to avoid confusion.
+        endif
       elseif response == 'rename'
         if len(b:luainspect_output) == 1
           call xolox#warning("No variable under cursor!")

@@ -4,7 +4,9 @@ The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki
 
  * If the text cursor is on a variable while the highlighting is refreshed then all occurrences of the variable will be marked in the style of [Vim's cursorline option](http://vimdoc.sourceforge.net/htmldoc/options.html#%27cursorline%27).
 
- * If you press `<F2>` with the text cursor on a variable then the plug-in will prompt you to rename the variable.
+ * Press `<F2>` with the text cursor on a variable and the plug-in will prompt you to rename the variable.
+
+ * Press `gd` (in normal mode) with the text cursor on a variable and you'll jump to its declaration / first occurrence.
 
  * When a syntax error is found (during highlighting or using the rename functionality) the lines where the error is reported will be marked like a spelling error.
 

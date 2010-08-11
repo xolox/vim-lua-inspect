@@ -11,7 +11,7 @@
 
 local LI = require 'luainspect.init'
 local LA = require 'luainspect.ast'
-local myprint, getcurvar, highlight, rename
+local actions, myprint, getcurvar = {}
 
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
@@ -35,8 +35,7 @@ function getcurvar(tokenlist, line, column)
   end
 end
 
-function highlight(tokenlist, line, column)
-  myprint 'highlight'
+function actions.highlight(tokenlist, line, column)
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     local kind
@@ -75,8 +74,20 @@ function highlight(tokenlist, line, column)
   end
 end
 
-function rename(tokenlist, line, column)
-  myprint 'rename'
+function actions.goto(tokenlist, line, column)
+  -- FIXME This only jumps to declaration of local / 1st occurrence of global.
+  local curvar = getcurvar(tokenlist, line, column)
+  for i, token in ipairs(tokenlist) do
+    if curvar and curvar.ast.id == token.ast.id then
+      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+      myprint(l1)
+      myprint(c1)
+      break
+    end
+  end
+end
+
+function actions.rename(tokenlist, line, column)
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     if curvar and curvar.ast.id == token.ast.id then
@@ -108,11 +119,10 @@ return function(src)
   -- Create a list of tokens from the AST and decorate it using luainspect.
   local tokenlist = LA.ast_to_tokenlist(ast, src)
   LI.inspect(ast, tokenlist)
-  -- Branch on the requested action.
-  if action == 'highlight' then
-    highlight(tokenlist, line, column)
-  elseif action == 'rename' then
-    rename(tokenlist, line, column)
+  -- Branch on requested action.
+  if actions[action] then
+    myprint(action)
+    actions[action](tokenlist, line, column)
   end
 end
 
