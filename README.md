@@ -1,6 +1,12 @@
 # Semantic highlighting for Lua in Vim
 
-The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki/LuaInspect) tool to (automatically) perform semantic highlighting of variables in Lua source code. It was inspired by [lua2-mode](http://www.enyo.de/fw/software/lua-emacs/lua2-mode.html) (for [Emacs](http://www.gnu.org/software/emacs/)) and the [SciTE](http://www.scintilla.org/SciTE.html) plug-in included with LuaInspect.
+The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki/LuaInspect) tool to (automatically) perform semantic highlighting of variables in Lua source code. It was inspired by [lua2-mode](http://www.enyo.de/fw/software/lua-emacs/lua2-mode.html) (for [Emacs](http://www.gnu.org/software/emacs/)) and the [SciTE](http://www.scintilla.org/SciTE.html) plug-in included with LuaInspect. In addition to the semantic highlighting the following features are currently supported:
+
+ * If the text cursor is on a variable while the highlighting is refreshed then all occurrences of the variable will be marked in the style of [Vim's cursorline option](http://vimdoc.sourceforge.net/htmldoc/options.html#%27cursorline%27).
+
+ * If you press `<F2>` with the text cursor on a variable then the plug-in will prompt you to rename the variable.
+
+ * When a syntax error is found (during highlighting or using the rename functionality) the lines where the error is reported will be marked like a spelling error.
 
 ![Screenshot of semantic highlighting](http://peterodding.com/code/vim/luainspect/screenshot.png)
 
@@ -30,7 +36,7 @@ You don't need to use this command unless you've disabled automatic highlighting
  * <span style="background: #D3D3D3">luaInspectSelectedVariable</span>
  * <span style="border-bottom: 1px dotted red">luaInspectSyntaxError</span>
 
-When a syntax error is found no highlighting can be performed but the lines where the error is reported will be marked like a spelling error. If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
+If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
 
 ### The `g:loaded_luainspect` option
 

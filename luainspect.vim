@@ -1,8 +1,8 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 10, 2010
+" Last Change: August 11, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.2.4
+" Version: 0.3
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -55,13 +55,13 @@ let s:groups['SyntaxError'] = 'SpellBad'
 
 " (Automatic) command definitions. {{{1
 
-command! -bar -bang LuaInspect call s:run_lua_inspect(<q-bang> != '!')
+command! -bar -bang LuaInspect call s:run_lua_inspect('highlight', <q-bang> != '!')
 
 augroup PluginLuaInspect
   " Clear existing automatic commands.
   autocmd!
   " Disable easytags.vim because it doesn't play nice with luainspect.vim!
-  autocmd BufReadPost * if s:check_plugin_enabled() | let b:easytags_nohl = 1 | endif
+  autocmd BufNewFile,BufReadPost,BufWritePost * call s:init_lua_buffer()
   " Define the configured automatic commands.
   for s:event in split(g:lua_inspect_events, ',')
     execute 'autocmd' s:event '* if s:check_plugin_enabled() | LuaInspect | endif'
@@ -74,15 +74,44 @@ function! s:check_plugin_enabled()
   return &ft == 'lua' && !&diff && !exists('b:luainspect_disabled')
 endfunction
 
-function! s:run_lua_inspect(enabled) " {{{2
-  if s:set_plugin_enabled(a:enabled)
+function! s:init_lua_buffer()
+  if s:check_plugin_enabled()
+    let b:easytags_nohl = 1
+    inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename', 1)<CR>
+    nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename', 1)<CR>
+  endif
+endfunction
+
+function! s:run_lua_inspect(action, enable) " {{{2
+  if s:set_plugin_enabled(a:enable)
     let lines = getline(1, "$")
     call insert(lines, col('.'))
     call insert(lines, line('.'))
+    call insert(lines, a:action)
     call s:parse_text(join(lines, "\n"), s:prepare_search_path())
-    call s:define_default_styles()
-    call s:clear_previous_matches()
-    call s:highlight_variables()
+    if !empty(b:luainspect_output)
+      let response = b:luainspect_output[0]
+      if response == 'syntax_error' && len(b:luainspect_output) >= 4
+        let linenum = b:luainspect_output[1] + 0
+        let colnum = b:luainspect_output[2] + 0
+        let linenum2 = b:luainspect_output[3] + 0
+        " TODO Can we do something useful with this?!
+        " let message = b:luainspect_output[4]
+        let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
+        execute printf(error_cmd, linenum - 1, (linenum2 ? linenum2 : line('$')) + 1)
+        return
+      elseif response == 'highlight'
+        call s:define_default_styles()
+        call s:clear_previous_matches()
+        call s:highlight_variables()
+      elseif response == 'rename'
+        if len(b:luainspect_output) == 1
+          call xolox#warning("No variable under cursor!")
+        else
+          call s:rename_variable()
+        endif
+      endif
+    endif
   endif
 endfunction
 
@@ -102,7 +131,7 @@ function! s:prepare_search_path() " {{{2
   let code = ''
   if !(has('lua') && g:lua_inspect_internal && exists('s:changed_path'))
     let template = 'package.path = ''%s/?.lua;'' .. package.path'
-    let code = printf(template, escape(expand(g:lua_inspect_path), '"\'))
+    let code = printf(template, escape(expand(g:lua_inspect_path), '"\'''))
     if has('lua') && g:lua_inspect_internal
       execute 'lua' code
       let s:changed_path = 1
@@ -122,7 +151,7 @@ function! s:parse_text(input, search_path) " {{{2
         " Ignore missing shell.vim plug-in.
         let b:luainspect_output = split(system(command, a:input), "\n")
         if v:shell_error
-          let msg = "Failed to execute lua-inspect as external process! %s"
+          let msg = "Failed to execute luainspect as external process! %s"
           throw printf(msg, strtrans(join(b:luainspect_output, "\n")))
         endif
       endtry
@@ -172,24 +201,62 @@ function! s:clear_previous_matches() " {{{2
 endfunction
 
 function! s:highlight_variables() " {{{2
-  if len(b:luainspect_output) == 1
-    let line = b:luainspect_output[0]
-    let errinfo = matchlist(line, '^\(\d\+\)\s*\(\d*\)$')
-    if len(errinfo) >= 3
-      let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
-      execute printf(error_cmd, errinfo[1] - 1, (errinfo[2] != '' ? errinfo[2] : line('$')) + 1)
-      return
+  for line in b:luainspect_output[1:-1]
+    if s:check_output(line, '^\w\+\(\s\+\d\+\)\{3}$')
+      let [hlgroup, linenum, firstcol, lastcol] = split(line)
+      let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
+      execute 'syntax match' hlgroup '/' . pattern . '/'
     endif
-  endif
-  for line in b:luainspect_output
-    if match(line, '^\w\+\(\s\+\d\+\)\{3}$') == -1
-      call xolox#warning("Invalid output from luainspect4vim.lua: %s", strtrans(line))
-      return
-    endif
-    let [type, lnum, start, end] = split(line)
-    let syntax_cmd = 'syntax match %s /\%%%il\%%>%ic\<\w\+\>\%%<%ic/'
-    execute printf(syntax_cmd, type, lnum, start - 1, end + 2)
   endfor
+endfunction
+
+function! s:rename_variable() " {{{2
+  " Highlight occurrences of variable before rename.
+  let highlights = []
+  for line in b:luainspect_output[1:-1]
+    if s:check_output(line, '^\d\+\(\s\+\d\+\)\{2}$')
+      let [linenum, firstcol, lastcol] = split(line)
+      let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
+      call add(highlights, matchadd('IncSearch', pattern))
+    endif
+  endfor
+  redraw
+  " Prompt for new name.
+  let oldname = expand('<cword>')
+  let prompt = "Please enter the new name for %s: "
+  let newname = input(printf(prompt, oldname), oldname)
+  " Clear highlighting of occurrences.
+  call map(highlights, 'matchdelete(v:val)')
+  " Perform rename?
+  if newname != '' && newname != oldname
+    let num_renamed = 0
+    for fields in reverse(b:luainspect_output[1:-1])
+      let [linenum, firstcol, lastcol] = split(fields)
+      let linenum += 0
+      let firstcol -= 2
+      let lastcol += 0
+      let line = getline(linenum)
+      let prefix = firstcol > 0 ? line[0 : firstcol] : ''
+      let suffix = lastcol < len(line) ? line[lastcol : -1] : ''
+      call setline(linenum, prefix . newname . suffix)
+      let num_renamed += 1
+    endfor
+    let msg = "Renamed %i occurrences of %s to %s"
+    call xolox#message(msg, num_renamed, oldname, newname)
+  endif
+endfunction
+
+function! s:check_output(line, pattern) " {{{2
+  if match(a:line, a:pattern) >= 0
+    return 1
+  else
+    call xolox#warning("Invalid output from luainspect4vim.lua: '%s'", strtrans(a:line))
+    return 0
+  endif
+endfunction
+
+function! s:highlight_position(linenum, firstcol, lastcol) " {{{2
+  return printf('\%%%il\%%>%ic\<\w\+\>\%%<%ic', a:linenum, a:firstcol, a:lastcol)
 endfunction
 
 " }}}1
