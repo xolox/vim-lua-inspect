@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 11, 2010
+ Last Change: August 12, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -235,7 +235,8 @@ return function(src)
     myprint(linenum)
     myprint(colnum)
     myprint(linenum2 or 0)
-    myprint(err or '')
+    -- Remove prefixed line number from error message because it's redundant.
+    myprint((err:gsub('^%d+:%s+', '')))
     return
   end
   -- Now parse the source code using metalua to build an abstract syntax tree.
