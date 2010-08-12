@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 12, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.6
+" Version: 0.3.7
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -41,15 +41,15 @@ endif
 
 " The highlight groups and default styles/links defined by this plug-in.
 let s:groups = {}
-let s:groups['GlobalDefined'] = 'guifg=#600000'
+let s:groups['GlobalDefined'] = ['guifg=#600000', 'guifg=#ffc080']
 let s:groups['GlobalUndefined'] = 'ErrorMsg'
-let s:groups['LocalUnused'] = 'guifg=#ffffff guibg=#0000ff'
-let s:groups['LocalMutated'] = 'gui=italic guifg=#000080'
-let s:groups['UpValue'] = 'guifg=#0000ff'
-let s:groups['Param'] = 'guifg=#000040'
-let s:groups['Local'] = 'guifg=#000080'
-let s:groups['FieldDefined'] = 'guifg=#600000'
-let s:groups['FieldUndefined'] = 'guifg=#c00000'
+let s:groups['LocalUnused'] = ['guifg=#ffffff guibg=#000080', 'guifg=#ffffff guibg=#000080']
+let s:groups['LocalMutated'] = ['gui=italic guifg=#000080', 'gui=italic guifg=#c0c0ff']
+let s:groups['UpValue'] = ['guifg=#0000ff', 'guifg=#e8e8ff']
+let s:groups['Param'] = ['guifg=#000040', 'guifg=#8080ff']
+let s:groups['Local'] = ['guifg=#000040', 'guifg=#c0c0ff']
+let s:groups['FieldDefined'] = ['guifg=#600000', 'guifg=#ffc080']
+let s:groups['FieldUndefined'] = ['guifg=#c00000', 'guifg=#ff0000']
 let s:groups['SelectedVariable'] = 'CursorLine'
 let s:groups['SyntaxError'] = 'SpellBad'
 let s:groups['WrongArgCount'] = 'SpellLocal'
@@ -207,18 +207,20 @@ endfunction
 function! s:define_default_styles() " {{{2
   " Always define the default highlighting styles
   " (copied from /luainspect/scite.lua for consistency).
-  " TODO Consider the &background?
-  for [group, style] in items(s:groups)
-    let defgroup = style
+  for [group, styles] in items(s:groups)
     let group = 'luaInspect' . group
-    if match(style, '=') >= 0
+    if type(styles) == type('')
+      let defgroup = styles
+    else
       let defgroup = 'luaInspectDefault' . group
+      let style = &bg == 'light' ? styles[0] : styles[1]
       execute 'highlight' defgroup style
     endif
     " Don't link the actual highlighting styles to the defaults if the user
     " has already defined or linked the highlighting group. This enables color
     " schemes and vimrc scripts to override the styles (see :help :hi-default).
     execute 'highlight def link' group defgroup
+    unlet styles " to avoid E706.
   endfor
 endfunction
 
