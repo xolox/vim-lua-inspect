@@ -125,13 +125,7 @@ function! s:parse_text(input, search_path) " {{{1
       endtry
     else
       redir => output
-      silent lua << EOF
-      if io == nil then
-        -- The Lua interface for Vim previously didn't include io.*!
-        io = { type = function() end }
-      end
-      require 'luainspect4vim' (vim.eval 'a:input')
-EOF
+      silent lua require 'luainspect4vim' (vim.eval 'a:input')
       redir END
       let b:luainspect_output = split(output, "\n")
     endif
