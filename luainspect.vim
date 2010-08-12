@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 12, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.7
+" Version: 0.3.8
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -251,7 +251,7 @@ function! s:highlight_variables() " {{{2
     if s:check_output(line, '^\w\+\(\s\+\d\+\)\{3}$')
       let [group, linenum, firstcol, lastcol] = split(line)
       let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
-      if group == 'luaInspectWarning'
+      if group == 'luaInspectWrongArgCount'
         call matchadd(group, pattern)
       elseif group == 'luaInspectSelectedVariable' 
         call matchadd(group, pattern, 20)
