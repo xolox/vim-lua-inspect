@@ -13,6 +13,8 @@ if &cp || exists('g:loaded_luainspect')
   finish
 endif
 
+let s:script = expand('<sfile>:p:~')
+
 " Configuration defaults. {{{1
 
 if !exists('g:lua_inspect_events')
@@ -56,37 +58,54 @@ let s:groups['WrongArgCount'] = 'SpellLocal'
 
 " (Automatic) command definitions. {{{1
 
-command! -bar -bang LuaInspect call s:run_lua_inspect('highlight', 1, <q-bang> != '!')
+command! -bar -bang LuaInspect call s:luainspect_command(<q-bang> == '!')
 
 augroup PluginLuaInspect
   " Clear existing automatic commands.
   autocmd!
-  " Disable easytags.vim because it doesn't play nice with luainspect.vim!
-  autocmd BufNewFile,BufReadPost,BufWritePost * call s:init_lua_buffer()
-  " Define the configured automatic commands.
+  " Automatically enable the plug-in on these events.
+  autocmd BufNewFile,BufReadPost,BufWritePost * call s:auto_enable_plugin()
+  " Define the configured automatic commands for highlighting.
   for s:event in split(g:lua_inspect_events, ',')
-    execute 'autocmd' s:event '* if s:check_plugin_enabled() | LuaInspect | endif'
+    execute 'autocmd' s:event '* if s:check_plugin_valid() | LuaInspect | endif'
   endfor
+  unlet s:event
 augroup END
 
 " Script local functions. {{{1
 
-function! s:check_plugin_enabled()
+function! s:check_plugin_valid() " {{{2
   return &ft == 'lua' && !&diff && !exists('b:luainspect_disabled')
 endfunction
 
-function! s:init_lua_buffer()
-  if s:check_plugin_enabled()
+function! s:luainspect_command(disable) " {{{2
+  if a:disable
+    call s:clear_previous_matches()
+    unlet! b:luainspect_input b:luainspect_output
+    let b:luainspect_disabled = 1
+  else
+    unlet! b:luainspect_disabled
+    let starttime = xolox#timer#start()
+    call s:run_lua_inspect('highlight')
+    let bufname = expand('%:p:~')
+    let msg = "%s: Highlighted %s in %s."
+    call xolox#timer#stop(msg, s:script, bufname, starttime)
+  endif
+endfunction
+
+function! s:auto_enable_plugin() " {{{2
+  if s:check_plugin_valid()
+    " Disable easytags.vim because it doesn't play nice with luainspect.vim!
     let b:easytags_nohl = 1
-    inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename', 0, 1)<CR>
-    nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename', 0, 1)<CR>
-    nnoremap <buffer> <silent> gd :call <Sid>run_lua_inspect('goto', 0, 1)<CR>
+    inoremap <buffer> <silent> <F2> <C-o>:call <Sid>run_lua_inspect('rename')<CR>
+    nnoremap <buffer> <silent> <F2> :call <Sid>run_lua_inspect('rename')<CR>
+    nnoremap <buffer> <silent> gd :call <Sid>run_lua_inspect('goto')<CR>
     setlocal ballooneval balloonexpr=LuaInspectToolTip()
   endif
 endfunction
 
 function! LuaInspectToolTip() " {{{2
-  let text = s:run_lua_inspect('tooltip', 0, 1)
+  let text = s:run_lua_inspect('tooltip')
   if exists('b:luainspect_syntax_error')
     return b:luainspect_syntax_error
   else
@@ -94,68 +113,60 @@ function! LuaInspectToolTip() " {{{2
   endif
 endfunction
 
-function! s:run_lua_inspect(action, toggle, enabled) " {{{2
-  if !a:toggle || s:set_plugin_enabled(a:enabled)
+function! s:run_lua_inspect(action) " {{{2
+  if a:action == 'tooltip'
+    let lines = getbufline(v:beval_bufnr, 1, "$")
+    call insert(lines, v:beval_col)
+    call insert(lines, v:beval_lnum)
+  else
     let lines = getline(1, "$")
-    if a:action == 'tooltip'
-      call insert(lines, v:beval_col)
-      call insert(lines, v:beval_lnum)
-    else
-      call insert(lines, col('.'))
-      call insert(lines, line('.'))
-    endif
-    call insert(lines, a:action)
-    call s:parse_text(join(lines, "\n"), s:prepare_search_path())
-    if !empty(b:luainspect_output)
-      let response = b:luainspect_output[0]
-      if response == 'syntax_error' && len(b:luainspect_output) >= 4
-        let linenum = b:luainspect_output[1] + 0
-        let colnum = b:luainspect_output[2] + 0
-        let linenum2 = b:luainspect_output[3] + 0
-        let b:luainspect_syntax_error = b:luainspect_output[4]
+    call insert(lines, col('.'))
+    call insert(lines, line('.'))
+  endif
+  call insert(lines, a:action)
+  call s:parse_text(join(lines, "\n"), s:prepare_search_path())
+  if !empty(b:luainspect_output)
+    let response = b:luainspect_output[0]
+    if response == 'syntax_error' && len(b:luainspect_output) >= 4
+      " Never perform syntax error highlighting in non-Lua buffers!
+      let linenum = b:luainspect_output[1] + 0
+      let colnum = b:luainspect_output[2] + 0
+      let linenum2 = b:luainspect_output[3] + 0
+      let b:luainspect_syntax_error = b:luainspect_output[4]
+      if a:action != 'tooltip' || v:beval_bufnr == bufnr('%')
         let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
         execute printf(error_cmd, linenum - 1, (linenum2 ? linenum2 : line('$')) + 1)
-        call xolox#warning("Syntax error around line %i: %s", linenum, b:luainspect_syntax_error)
-        return
       endif
-      unlet! b:luainspect_syntax_error
-      if response == 'highlight'
-        call s:define_default_styles()
-        call s:clear_previous_matches()
-        call s:highlight_variables()
-      elseif response == 'goto'
-        if len(b:luainspect_output) < 3
-          call xolox#warning("No variable under cursor!")
-        else
-          let linenum = b:luainspect_output[1] + 0
-          let colnum = b:luainspect_output[2] + 0
-          call setpos('.', [0, linenum, colnum, 0])
-          call xolox#message("") " Clear any previous message to avoid confusion.
-        endif
-      elseif response == 'tooltip'
-        if len(b:luainspect_output) > 1
-          return join(b:luainspect_output[1:-1], "\n")
-        endif
-      elseif response == 'rename'
-        if len(b:luainspect_output) == 1
-          call xolox#warning("No variable under cursor!")
-        else
-          call s:rename_variable()
-        endif
+      " But always let the user know that a syntax error exists.
+      let bufname = fnamemodify(bufname(a:action != 'tooltip' ? '%' : v:beval_bufnr), ':p:~')
+      call xolox#warning("Syntax error around line %i in %s: %s", linenum, bufname, b:luainspect_syntax_error)
+      return
+    endif
+    unlet! b:luainspect_syntax_error
+    if response == 'highlight'
+      call s:define_default_styles()
+      call s:clear_previous_matches()
+      call s:highlight_variables()
+    elseif response == 'goto'
+      if len(b:luainspect_output) < 3
+        call xolox#warning("No variable under cursor!")
+      else
+        let linenum = b:luainspect_output[1] + 0
+        let colnum = b:luainspect_output[2] + 0
+        call setpos('.', [0, linenum, colnum, 0])
+        call xolox#message("") " Clear any previous message to avoid confusion.
+      endif
+    elseif response == 'tooltip'
+      if len(b:luainspect_output) > 1
+        return join(b:luainspect_output[1:-1], "\n")
+      endif
+    elseif response == 'rename'
+      if len(b:luainspect_output) == 1
+        call xolox#warning("No variable under cursor!")
+      else
+        call s:rename_variable()
       endif
     endif
-  endif
-endfunction
-
-function! s:set_plugin_enabled(enabled) " {{{2
-  if a:enabled
-    unlet! b:luainspect_disabled
-    return 1
-  else
-    call s:clear_previous_matches()
-    unlet! b:luainspect_input b:luainspect_output
-    let b:luainspect_disabled = 1
-    return 0
   endif
 endfunction
 

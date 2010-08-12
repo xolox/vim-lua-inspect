@@ -83,25 +83,34 @@ end
 
 function actions.tooltip(tokenlist, line, column) -- {{{1
   local did_details = false
+  local note
   for i, token in ipairs(tokenlist) do
     if token.ast.lineinfo then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
       local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
       if l1 == line then
         local ast = token.ast
-        if ast and ast.id and column >= c1 and column <= c2 and not did_details then
-          printvartype(token)
-          printsignature(ast)
-          printvalue(ast)
-          did_details = true
-        end
-        if ast.note then
-          if ast.note:find '[Tt]oo%s+%w+%s+arguments' then
-            myprint("Warning: " .. ast.note)
-          else
-            myprint("Note: " .. ast.note)
+        if ast and column >= c1 and column <= c2 then
+          if ast.id and not did_details then
+            printvartype(token)
+            printsignature(ast)
+            printvalue(ast)
+            if note then
+              myprint(note)
+              break
+            end
           end
-          break
+          if ast.note then
+            -- This is complicated by the fact that I don't really understand
+            -- the metalua/lua-inspect abstract syntax tree and apparently notes
+            -- are not always available on the identifier token printed above.
+            local iswarning = ast.note:find '[Tt]oo%s+%w+%s+arguments'
+            note = (iswarning and "Warning: " or "Note: ") .. ast.note
+            if did_details then
+              myprint(note)
+              break
+            end
+          end
         end
       end
     end
