@@ -15,6 +15,7 @@ local LI = require 'luainspect.init'
 local LA = require 'luainspect.ast'
 local LS = require 'luainspect.signatures'
 local actions, myprint, getcurvar, knownvarorfield = {}
+local printvartype, printsignature, printvalue
 
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
@@ -26,7 +27,7 @@ else
   function myprint(text) io.write(text, '\n') end
 end
 
-function getcurvar(tokenlist, line, column)
+function getcurvar(tokenlist, line, column) -- {{{1
   for i, token in ipairs(tokenlist) do
     if token.ast.lineinfo then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
@@ -38,57 +39,78 @@ function getcurvar(tokenlist, line, column)
   end
 end
 
-function knownvarorfield(token)
+function knownvarorfield(token) -- {{{1
   local a = token.ast
   local v = a.seevalue or a
   return a.definedglobal or v.valueknown and v.value ~= nil
 end
 
-function actions.highlight(tokenlist, line, column)
+function actions.highlight(tokenlist, line, column) -- {{{1
+  local function dump(token, hlgroup)
+    local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+    local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
+    myprint(hlgroup .. ' ' .. l1 .. ' ' .. c1 .. ' ' .. c2)
+  end
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     if curvar and curvar.ast.id == token.ast.id then
+      dump(token, 'luaInspectSelectedVariable')
+    end
+    if token.ast.note and token.ast.note:find '[Tt]oo%s+%w+%s+arguments' then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
       local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
-      if l1 == l2 then myprint('luaInspectSelectedVariable ' .. l1 .. ' ' .. c1 .. ' ' .. c2) end
+      dump(token, 'luaInspectWrongArgCount')
     end
-    local kind
     if token.tag == 'Id' then
       if not token.ast.localdefinition then
-        if token.ast.definedglobal then
-          kind = 'luaInspectGlobalDefined'
-        else
-          kind = 'luaInspectGlobalUndefined'
-        end
+        dump(token, token.ast.definedglobal and 'luaInspectGlobalDefined' or 'luaInspectGlobalUndefined')
       elseif not token.ast.localdefinition.isused then
-        kind = 'luaInspectLocalUnused'
+        dump(token, 'luaInspectLocalUnused')
       elseif token.ast.localdefinition.functionlevel < token.ast.functionlevel then
-        kind = 'luaInspectUpValue'
+        dump(token, 'luaInspectUpValue')
       elseif token.ast.localdefinition.isset then
-        kind = 'luaInspectLocalMutated'
+        dump(token, 'luaInspectLocalMutated')
       elseif token.ast.localdefinition.isparam then
-        kind = 'luaInspectParam'
+        dump(token, 'luaInspectParam')
       else
-        kind = 'luaInspectLocal'
+        dump(token, 'luaInspectLocal')
       end
     elseif token.ast.isfield then
-      kind = knownvarorfield(token) and 'luaInspectFieldDefined' or 'luaInspectFieldUndefined'
-    end
-    if kind then
-      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
-      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
-      if l1 == l2 then myprint(kind .. ' ' .. l1 .. ' ' .. c1 .. ' ' .. c2) end
+      dump(token, knownvarorfield(token) and 'luaInspectFieldDefined' or 'luaInspectFieldUndefined')
     end
   end
 end
 
-function actions.tooltip(tokenlist, line, column)
-  local text = {}
-  local token = getcurvar(tokenlist, line, column)
-  if not token then return end
+function actions.tooltip(tokenlist, line, column) -- {{{1
+  local did_details = false
+  for i, token in ipairs(tokenlist) do
+    if token.ast.lineinfo then
+      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
+      if l1 == line then
+        local ast = token.ast
+        if ast and ast.id and column >= c1 and column <= c2 and not did_details then
+          printvartype(token)
+          printsignature(ast)
+          printvalue(ast)
+          did_details = true
+        end
+        if ast.note then
+          if ast.note:find '[Tt]oo%s+%w+%s+arguments' then
+            myprint("Warning: " .. ast.note)
+          else
+            myprint("Note: " .. ast.note)
+          end
+          break
+        end
+      end
+    end
+  end
+end
+
+function printvartype(token) -- {{{1
   local ast = token.ast
-  if not ast then return end
-  -- Describe the variable type and status.
+  local text = {}
   if ast.localdefinition then
     if not ast.localdefinition.isused then text[#text+1] = "unused" end
     if ast.localdefinition.isset then text[#text+1] = "mutable" end
@@ -114,22 +136,17 @@ function actions.tooltip(tokenlist, line, column)
   -- unknown table field even though table.concat() returns a string?!
   text = table.concat(text, ' ')
   myprint("This is " .. (text:find '^[aeiou]' and 'an' or 'a') .. ' ' .. text .. '.')
+end
+
+function printsignature(ast) -- {{{1
   -- Display signatures for standard library functions.
   local name = ast.resolvedname
   local signature = name and LS.global_signatures[name]
   if not signature then
     local value = (ast.seevalue or ast).value
-    for name, sig in pairs(LS.global_signatures) do
-      if value == loadstring('return ' .. name)() then
-        signature = sig
-      end
-    end
+    signature = value and LS.value_signatures[value]
   end
   if signature then
-    -- luainspect/signatures.lua contains special bullet characters in the
-    -- latin1 character encoding (according to Vim) which Vim doesn't like
-    -- in tooltips (I guess because it expects UTF-8).
-    signature = signature:gsub('\183', '.')
     if not signature:find '%w %b()$' then
       myprint 'Its description is:'
       myprint('    ' .. signature)
@@ -138,6 +155,9 @@ function actions.tooltip(tokenlist, line, column)
       myprint('    ' .. signature)
     end
   end
+end
+
+function printvalue(ast) -- {{{1
   -- Try to represent the value as a string.
   local value = (ast.seevalue or ast).value
   if type(value) == 'table' then
@@ -145,7 +165,7 @@ function actions.tooltip(tokenlist, line, column)
     local keys = {}
     for k, v in pairs(value) do
       if type(k) == 'string' then
-        keys[#keys+1] = k
+        keys[#keys+1] = k .. (type(v) == 'function' and '()' or '')
       elseif type(k) == 'number' then
         keys[#keys+1] = '[' .. k .. ']'
       else
@@ -195,14 +215,9 @@ function actions.tooltip(tokenlist, line, column)
   elseif value ~= nil then
     myprint("Its value is the " .. type(value) .. ' ' .. tostring(value) .. '.')
   end
-  --[[ TODO Print warning notes attached to function calls?
-  local vast = ast.seevalue or ast
-  local note = vast.parent and (vast.parent.tag == 'Call' or vast.parent.tag == 'Invoke') and vast.parent.note
-  if note then myprint("WARNING: " .. note) end
-  --]]
 end
 
-function actions.goto(tokenlist, line, column)
+function actions.goto(tokenlist, line, column) -- {{{1
   -- FIXME This only jumps to declaration of local / 1st occurrence of global.
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
@@ -215,7 +230,7 @@ function actions.goto(tokenlist, line, column)
   end
 end
 
-function actions.rename(tokenlist, line, column)
+function actions.rename(tokenlist, line, column) -- {{{1
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     if curvar and curvar.ast.id == token.ast.id then
@@ -225,6 +240,8 @@ function actions.rename(tokenlist, line, column)
     end
   end
 end
+
+-- }}}
 
 return function(src)
   local action, line, column, src = src:match '^(%S+)\n(%d+)\n(%d+)\n(.*)$'

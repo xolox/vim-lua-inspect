@@ -10,6 +10,8 @@ The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki
 
  * If the text cursor is on a variable while the highlighting is refreshed then all occurrences of the variable will be marked in the style of [Vim's cursorline option](http://vimdoc.sourceforge.net/htmldoc/options.html#%27cursorline%27).
 
+ * When luainspect reports a wrong argument count for a function call the call will be highlighted with a green underline. When you hover over the highlighted text a tooltip shows the associated warning message.
+
  * When a syntax error is found (during highlighting or using the rename functionality) the lines where the error is reported will be marked like a spelling error.
 
 ![Screenshot of semantic highlighting](http://peterodding.com/code/vim/luainspect/screenshot.png)
@@ -38,6 +40,7 @@ You don't need to use this command unless you've disabled automatic highlighting
  * <span style="color: #600000">luaInspectFieldDefined</span>
  * <span style="color: #C00000">luaInspectFieldUndefined</span>
  * <span style="background: #D3D3D3">luaInspectSelectedVariable</span>
+ * <span style="border-bottom: 1px dotted green">luaInspectWrongArgCount</span>
  * <span style="border-bottom: 1px dotted red">luaInspectSyntaxError</span>
 
 If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
