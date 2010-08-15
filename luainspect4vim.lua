@@ -9,13 +9,11 @@
 
 --]]
 
-local MAX_PREVIEW_KEYS = 20
-
 local LI = require 'luainspect.init'
 local LA = require 'luainspect.ast'
-local LS = require 'luainspect.signatures'
-local actions, myprint, getcurvar, knownvarorfield = {}
-local printvartype, printsignature, printvalue
+local MAX_PREVIEW_KEYS = 20
+local actions = {}
+local myprint
 
 if type(vim) == 'table' and vim.eval then
   -- The Lua interface for Vim redefines print() so it prints inside Vim.
@@ -27,7 +25,7 @@ else
   function myprint(text) io.write(text, '\n') end
 end
 
-function getcurvar(tokenlist, line, column) -- {{{1
+local function getcurvar(tokenlist, line, column) -- {{{1
   for i, token in ipairs(tokenlist) do
     if token.ast.lineinfo then
       local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
@@ -39,7 +37,7 @@ function getcurvar(tokenlist, line, column) -- {{{1
   end
 end
 
-function knownvarorfield(token) -- {{{1
+local function knownvarorfield(token) -- {{{1
   local a = token.ast
   local v = a.seevalue or a
   return a.definedglobal or v.valueknown and v.value ~= nil
@@ -81,20 +79,56 @@ function actions.highlight(tokenlist, line, column) -- {{{1
   end
 end
 
-function actions.tooltip(tokenlist, line, column) -- {{{1
+local function previewtable(ast) -- {{{1
+  -- Print a preview of a table's fields.
+  local value = (ast.seevalue or ast).value
+  if type(value) == 'table' then
+    -- Print at most MAX_PREVIEW_KEYS of the table's keys.
+    local keys = {}
+    local count = 0
+    for k, v in pairs(value) do
+      if #keys < MAX_PREVIEW_KEYS then
+        if type(k) == 'string' and k:find '^[A-Za-z_][A-Za-z0-9_]*$' then
+          keys[#keys+1] = k .. (type(v) == 'function' and '()' or '')
+        end
+      end
+      count = count + 1
+    end
+    table.sort(keys)
+    if count > 0 then
+      local fields = #keys == 1 and ' field' or ' fields'
+      local including = count ~= #keys and ' including' or ''
+      myprint('This table contains ' .. count .. fields .. including .. ':')
+      for i, k in ipairs(keys) do myprint(' - ' .. k) end
+    end
+  end
+end
+
+function actions.tooltip(tokenlist, line, column, src) -- {{{1
   local did_details = false
   local note
   for i, token in ipairs(tokenlist) do
-    if token.ast.lineinfo then
-      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
-      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
+    local ast = token.ast
+    if ast.lineinfo then
+      local l1, c1 = unpack(ast.lineinfo.first, 1, 2)
+      local l2, c2 = unpack(ast.lineinfo.last, 1, 2)
       if l1 == line then
-        local ast = token.ast
-        if ast and column >= c1 and column <= c2 then
+        if column >= c1 and column <= c2 then
           if ast.id and not did_details then
-            printvartype(token)
-            printsignature(ast)
-            printvalue(ast)
+            local details = LI.get_value_details(ast, tokenlist, src)
+            if details ~= '?' then
+              -- Convert variable type to readable sentence (friendlier to new users IMHO).
+              details = details:gsub('^[^\n]+', function(vartype)
+                local vartype = vartype:match '^%s*(.-)%s*$'
+                if vartype:find 'local$' or vartype:find 'global' then
+                  vartype = vartype .. ' ' .. 'variable'
+                end
+                local article = details:find '^[aeiou]' and 'an' or 'a'
+                return "This is " .. article .. ' ' .. vartype .. '.'
+              end)
+              myprint(details)
+            end
+            previewtable(ast)
             if note then
               myprint(note)
               break
@@ -114,115 +148,6 @@ function actions.tooltip(tokenlist, line, column) -- {{{1
         end
       end
     end
-  end
-end
-
-function printvartype(token) -- {{{1
-  local ast = token.ast
-  local text = {}
-  if ast.localdefinition then
-    if not ast.localdefinition.isused then text[#text+1] = "unused" end
-    if ast.localdefinition.isset then text[#text+1] = "mutable" end
-    if ast.localmasking then text[#text+1] = "masking" end
-    if ast.localmasked then text[#text+1] = "masked" end
-    if ast.localdefinition.functionlevel < ast.functionlevel then
-      text[#text+1] = "upvalue"
-    elseif ast.localdefinition.isparam then
-      text[#text+1]  = "function parameter"
-    else
-      text[#text+1] = "local variable"
-    end
-  elseif ast.tag == 'Id' then
-    text[#text+1] = knownvarorfield(token) and "known" or "unknown"
-    text[#text+1] = "global variable"
-  elseif ast.isfield then
-    text[#text+1] = knownvarorfield(token) and "known" or "unknown"
-    text[#text+1] = "table field"
-  else
-    return
-  end
-  -- TODO Bug in LuaInspect's static analysis? text:find() below is marked as
-  -- an unknown table field even though table.concat() returns a string?!
-  text = table.concat(text, ' ')
-  myprint("This is " .. (text:find '^[aeiou]' and 'an' or 'a') .. ' ' .. text .. '.')
-end
-
-function printsignature(ast) -- {{{1
-  -- Display signatures for standard library functions.
-  local name = ast.resolvedname
-  local signature = name and LS.global_signatures[name]
-  if not signature then
-    local value = (ast.seevalue or ast).value
-    signature = value and LS.value_signatures[value]
-  end
-  if signature then
-    if not signature:find '%w %b()$' then
-      myprint 'Its description is:'
-      myprint('    ' .. signature)
-    else
-      myprint 'Its signature is as follows:'
-      myprint('    ' .. signature)
-    end
-  end
-end
-
-function printvalue(ast) -- {{{1
-  -- Try to represent the value as a string.
-  local value = (ast.seevalue or ast).value
-  if type(value) == 'table' then
-    -- Print at most MAX_PREVIEW_KEYS of the table's keys.
-    local keys = {}
-    for k, v in pairs(value) do
-      if type(k) == 'string' then
-        keys[#keys+1] = k .. (type(v) == 'function' and '()' or '')
-      elseif type(k) == 'number' then
-        keys[#keys+1] = '[' .. k .. ']'
-      else
-        keys[#keys+1] = tostring(k)
-      end
-    end
-    table.sort(keys)
-    if #keys > MAX_PREVIEW_KEYS then
-      myprint('Its value is a table with ' .. #keys .. ' fields including:')
-      for i, k in ipairs(keys) do
-        myprint(' - ' .. k)
-        if i == MAX_PREVIEW_KEYS then break end
-      end
-    elseif #keys >= 1 then
-      myprint("Its value is a table with the following field" .. (#keys > 1 and "s" or '') .. ":")
-      for i, k in ipairs(keys) do myprint(' - ' .. k) end
-    else
-      myprint 'Its value is a table.'
-    end
-  elseif type(value) == 'string' then
-    -- Print string value.
-    if value ~= '' then
-      myprint("Its value is the string " .. string.format('%q', value) .. ".")
-    else
-      myprint "Its value is a string."
-    end
-  elseif type(value) == 'function' then
-    -- Print function details.
-    local text = { "Its value is a" }
-    local info = debug.getinfo(value)
-    text[#text+1] = info.what
-    text[#text+1] = "function"
-    -- Try to find out where the function was defined.
-    local source = (info.source or ''):match '^@(.+)$'
-    if source and not source:find '[\\/]+luainspect[\\/]+.-%.lua$' then
-      source = source:gsub('^/home/[^/]+/', '~/')
-      text[#text+1] = "defined in"
-      text[#text+1] = source
-      if info.linedefined then
-        text[#text+1] = "on line"
-        text[#text+1] = info.linedefined
-      end
-    end
-    myprint(table.concat(text, ' ') .. '.')
-  elseif type(value) == 'userdata' then
-    myprint("Its value is a " .. type(value) .. '.')
-  elseif value ~= nil then
-    myprint("Its value is the " .. type(value) .. ' ' .. tostring(value) .. '.')
   end
 end
 
@@ -278,7 +203,7 @@ return function(src)
   -- Branch on the requested action.
   if actions[action] then
     myprint(action)
-    actions[action](tokenlist, line, column)
+    actions[action](tokenlist, line, column, src)
   end
 end
 

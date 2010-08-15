@@ -126,7 +126,7 @@ function! s:parse_text(input, search_path) " {{{1
         " Ignore missing shell.vim plug-in.
         let b:luainspect_output = split(system(command, a:input), "\n")
         if v:shell_error
-          let msg = "Failed to execute luainspect as external process! %s"
+          let msg = "Failed to execute LuaInspect as external process! %s"
           throw printf(msg, strtrans(join(b:luainspect_output, "\n")))
         endif
       endtry
