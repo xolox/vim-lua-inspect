@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 12, 2010
+ Last Change: August 15, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -253,7 +253,7 @@ end
 -- }}}
 
 return function(src)
-  local action, line, column, src = src:match '^(%S+)\n(%d+)\n(%d+)\n(.*)$'
+  local action, file, line, column, src = src:match '^(%S+)\n([^\n]+)\n(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
   column = tonumber(column)
   src = LA.remove_shebang(src)
@@ -269,7 +269,7 @@ return function(src)
     return
   end
   -- Now parse the source code using metalua to build an abstract syntax tree.
-  local ast; ast, err, linenum, colnum, linenum2 = LA.ast_from_string(src, "noname.lua")
+  local ast = LA.ast_from_string(src, file)
   if not ast then return end
   -- Create a list of tokens from the AST and decorate it using luainspect.
   local tokenlist = LA.ast_to_tokenlist(ast, src)
