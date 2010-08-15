@@ -43,12 +43,17 @@ local function knownvarorfield(token) -- {{{1
   return a.definedglobal or v.valueknown and v.value ~= nil
 end
 
-function actions.highlight(tokenlist, line, column) -- {{{1
+function actions.highlight(tokenlist, line, column, src) -- {{{1
   local function dump(token, hlgroup)
     local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
     local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
     myprint(('%s %i %i %i %i'):format(hlgroup, l1, c1, l2, c2))
   end
+  -- Print any warnings to show in Vim's quick-fix list.
+  -- FIXME Why does this report argument count warnings in luainspect/init.lua but not in example.lua?!
+  local warnings = LI.list_warnings(tokenlist, src)
+  myprint(#warnings)
+  for i, warning in ipairs(warnings) do myprint(warning) end
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     if curvar and curvar.ast.id == token.ast.id then
@@ -119,7 +124,7 @@ function actions.tooltip(tokenlist, line, column, src) -- {{{1
             if details ~= '?' then
               -- Convert variable type to readable sentence (friendlier to new users IMHO).
               details = details:gsub('^[^\n]+', function(vartype)
-                local vartype = vartype:match '^%s*(.-)%s*$'
+                vartype = vartype:match '^%s*(.-)%s*$'
                 if vartype:find 'local$' or vartype:find 'global' then
                   vartype = vartype .. ' ' .. 'variable'
                 end
@@ -178,7 +183,8 @@ end
 -- }}}
 
 return function(src)
-  local action, file, line, column, src = src:match '^(%S+)\n([^\n]+)\n(%d+)\n(%d+)\n(.*)$'
+  local action, file, line, column
+  action, file, line, column, src = src:match '^(%S+)\n([^\n]+)\n(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
   column = tonumber(column)
   src = LA.remove_shebang(src)

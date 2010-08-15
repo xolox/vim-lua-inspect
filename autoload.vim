@@ -26,7 +26,9 @@ endfunction
 function! luainspect#highlight_cmd(disable) " {{{1
   if a:disable
     call s:clear_previous_matches()
-    unlet! b:luainspect_input b:luainspect_output
+    unlet! b:luainspect_input
+    unlet! b:luainspect_output
+    unlet! b:luainspect_warnings
     let b:luainspect_disabled = 1
   else
     unlet! b:luainspect_disabled
@@ -173,7 +175,10 @@ endfunction
 
 function! s:highlight_variables() " {{{1
   call clearmatches()
-  for line in b:luainspect_output[1:-1]
+  let num_warnings = b:luainspect_output[1] + 0
+  call s:update_warnings(num_warnings > 0 ? b:luainspect_output[2 : num_warnings+1] : [])
+  let other_output = b:luainspect_output[num_warnings+2 : -1]
+  for line in other_output
     if s:check_output(line, '^\w\+\(\s\+\d\+\)\{4}$')
       let [group, l1, c1, l2, c2] = split(line)
       let l1 += 0
@@ -190,6 +195,39 @@ function! s:highlight_variables() " {{{1
       endif
     endif
   endfor
+endfunction
+
+function! s:update_warnings(warnings) " {{{1
+  if !g:lua_inspect_warnings
+    return
+  endif
+  let list = []
+  for line in a:warnings
+    if s:check_output(line, '^line\s\+\d\+\s\+column\s\+\d\+\s\+-\s\+\S')
+      let fields = split(line)
+      let linenum = fields[1] + 0
+      let colnum = fields[3] + 0
+      let message = join(fields[5:-1])
+      call add(list, { 'bufnr': bufnr('%'), 'lnum': linenum, 'col': colnum, 'text': message })
+    endif
+  endfor
+  " Don't update the location list when it hasn't changed, because Vim will
+  " reset the highlighting of the current item in the location list!
+  if !exists('b:luainspect_warnings') || b:luainspect_warnings != list
+    call setloclist(winnr(), list, 'r')
+    let b:luainspect_warnings = list
+  endif
+  if !empty(list)
+    lopen
+    if winheight(winnr()) > 4
+      resize 4
+    endif
+    let warnings = len(list) > 1 ? 'warnings' : 'warning'
+    let w:quickfix_title = printf('%i %s reported by LuaInspect', len(list), warnings)
+    wincmd w
+  else
+    lclose
+  endif
 endfunction
 
 function! s:rename_variable() " {{{1

@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: August 15, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.11
+" Version: 0.4
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -11,6 +11,11 @@
 " Don't source the plug-in when its already been loaded or &compatible is set.
 if &cp || exists('g:loaded_luainspect')
   finish
+endif
+
+if !exists('g:lua_inspect_warnings')
+  " Change this to disable automatic warning messages.
+  let g:lua_inspect_warnings = 1
 endif
 
 if !exists('g:lua_inspect_events')

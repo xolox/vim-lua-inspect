@@ -12,6 +12,8 @@ The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki
 
  * When luainspect reports a wrong argument count for a function call the text will be highlighted with a green underline. When you hover over the highlighted text a tooltip shows the associated warning message.
 
+ * When LuaInspect reports warnings about unused variables, wrong argument counts, etc. they are shown in a [location list window](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#location-list).
+
  * When a syntax error is found (during highlighting or using the rename functionality) the lines where the error is reported will be marked like a spelling error.
 
 ![Screenshot of semantic highlighting](http://peterodding.com/code/vim/luainspect/screenshot.png)
@@ -50,6 +52,12 @@ If you don't like one or more of the default styles the Vim documentation [descr
 This variable isn't really an option but if you want to avoid loading the `luainspect.vim` plug-in you can set this variable to any value in your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
 
     :let g:loaded_luainspect = 1
+
+### The `g:lua_inspect_warnings` option
+
+When LuaInspect reports warnings about unused variables, wrong argument counts, etc. they are automatically shown in a [location list window](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#location-list). If you don't like this add the following to your [vimrc script](http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc):
+
+    :let g:lua_inspect_warnings = 0
 
 ### The `g:lua_inspect_events` option
 
