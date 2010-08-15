@@ -1,8 +1,8 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 12, 2010
+" Last Change: August 15, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.3.8
+" Version: 0.3.9
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.

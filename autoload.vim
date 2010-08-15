@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 12, 2010
+" Last Change: August 15, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -30,15 +30,12 @@ function! luainspect#highlight_cmd(disable) " {{{1
     let b:luainspect_disabled = 1
   else
     unlet! b:luainspect_disabled
-    let starttime = xolox#timer#start()
     call luainspect#make_request('highlight')
-    let bufname = expand('%:p:~')
-    let msg = "%s: Highlighted %s in %s."
-    call xolox#timer#stop(msg, s:script, bufname, starttime)
   endif
 endfunction
 
 function! luainspect#make_request(action) " {{{1
+  let starttime = xolox#timer#start()
   if a:action == 'tooltip'
     let lines = getbufline(v:beval_bufnr, 1, "$")
     call insert(lines, v:beval_col)
@@ -52,6 +49,7 @@ function! luainspect#make_request(action) " {{{1
   call s:parse_text(join(lines, "\n"), s:prepare_search_path())
   if !empty(b:luainspect_output)
     let response = b:luainspect_output[0]
+    let bufname = fnamemodify(bufname(a:action != 'tooltip' ? '%' : v:beval_bufnr), ':p:~')
     if response == 'syntax_error' && len(b:luainspect_output) >= 4
       " Never perform syntax error highlighting in non-Lua buffers!
       let linenum = b:luainspect_output[1] + 0
@@ -62,8 +60,8 @@ function! luainspect#make_request(action) " {{{1
         let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
         execute printf(error_cmd, linenum - 1, (linenum2 ? linenum2 : line('$')) + 1)
       endif
+      call xolox#timer#stop("%s: Found a syntax error in %s in %s.", s:script, bufname, starttime)
       " But always let the user know that a syntax error exists.
-      let bufname = fnamemodify(bufname(a:action != 'tooltip' ? '%' : v:beval_bufnr), ':p:~')
       call xolox#warning("Syntax error around line %i in %s: %s", linenum, bufname, b:luainspect_syntax_error)
       return
     endif
@@ -72,6 +70,7 @@ function! luainspect#make_request(action) " {{{1
       call s:define_default_styles()
       call s:clear_previous_matches()
       call s:highlight_variables()
+      call xolox#timer#stop("%s: Highlighted variables in %s in %s.", s:script, bufname, starttime)
     elseif response == 'goto'
       if len(b:luainspect_output) < 3
         call xolox#warning("No variable under cursor!")
@@ -79,17 +78,23 @@ function! luainspect#make_request(action) " {{{1
         let linenum = b:luainspect_output[1] + 0
         let colnum = b:luainspect_output[2] + 0
         call setpos('.', [0, linenum, colnum, 0])
-        call xolox#message("") " Clear any previous message to avoid confusion.
+        call xolox#timer#stop("%s: Jumped to definition in %s in %s.", s:script, bufname, starttime)
+        if &verbose == 0
+          " Clear previous "No variable under cursor!" message to avoid confusion.
+          call xolox#message("")
+        endif
       endif
     elseif response == 'tooltip'
       if len(b:luainspect_output) > 1
+        call xolox#timer#stop("%s: Rendered tool tip for %s in %s.", s:script, bufname, starttime)
         return join(b:luainspect_output[1:-1], "\n")
       endif
     elseif response == 'rename'
-      if len(b:luainspect_output) == 1
-        call xolox#warning("No variable under cursor!")
-      else
+      if len(b:luainspect_output) > 1
+        call xolox#timer#stop("%s: Prepared for rename in %s in %s.", s:script, bufname, starttime)
         call s:rename_variable()
+      else
+        call xolox#warning("No variable under cursor!")
       endif
     endif
   endif
