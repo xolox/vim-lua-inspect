@@ -102,7 +102,7 @@ function actions.tooltip(tokenlist, line, column) -- {{{1
           end
           if ast.note then
             -- This is complicated by the fact that I don't really understand
-            -- the metalua/lua-inspect abstract syntax tree and apparently notes
+            -- the Metalua/LuaInspect abstract syntax tree and apparently notes
             -- are not always available on the identifier token printed above.
             local iswarning = ast.note:find '[Tt]oo%s+%w+%s+arguments'
             note = (iswarning and "Warning: " or "Note: ") .. ast.note
@@ -141,8 +141,8 @@ function printvartype(token) -- {{{1
   else
     return
   end
-  -- TODO Bug in luainspect's static analysis? :gsub() below is marked as an
-  -- unknown table field even though table.concat() returns a string?!
+  -- TODO Bug in LuaInspect's static analysis? text:find() below is marked as
+  -- an unknown table field even though table.concat() returns a string?!
   text = table.concat(text, ' ')
   myprint("This is " .. (text:find '^[aeiou]' and 'an' or 'a') .. ' ' .. text .. '.')
 end
@@ -268,13 +268,14 @@ return function(src)
     myprint((err:gsub('^%d+:%s+', '')))
     return
   end
-  -- Now parse the source code using metalua to build an abstract syntax tree.
+  -- Now parse the source code using Metalua to build an abstract syntax tree.
   local ast = LA.ast_from_string(src, file)
+  -- This shouldn't happen: Metalua failed to parse what loadstring() accepts!
   if not ast then return end
-  -- Create a list of tokens from the AST and decorate it using luainspect.
+  -- Create a list of tokens from the AST and decorate it using LuaInspect.
   local tokenlist = LA.ast_to_tokenlist(ast, src)
   LI.inspect(ast, tokenlist)
-  -- Branch on requested action.
+  -- Branch on the requested action.
   if actions[action] then
     myprint(action)
     actions[action](tokenlist, line, column)
