@@ -49,7 +49,7 @@ function actions.highlight(tokenlist, line, column) -- {{{1
   local function dump(token, hlgroup)
     local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
     local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
-    myprint(hlgroup .. ' ' .. l1 .. ' ' .. c1 .. ' ' .. c2)
+    myprint(('%s %i %i %i %i'):format(hlgroup, l1, c1, l2, c2))
   end
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do

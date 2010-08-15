@@ -174,14 +174,18 @@ endfunction
 function! s:highlight_variables() " {{{1
   call clearmatches()
   for line in b:luainspect_output[1:-1]
-    if s:check_output(line, '^\w\+\(\s\+\d\+\)\{3}$')
-      let [group, linenum, firstcol, lastcol] = split(line)
-      let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
+    if s:check_output(line, '^\w\+\(\s\+\d\+\)\{4}$')
+      let [group, l1, c1, l2, c2] = split(line)
+      let l1 += 0
+      let c1 -= 1
+      let l2 += 0
+      let c2 += 2
       if group == 'luaInspectWrongArgCount'
-        call matchadd(group, pattern)
+        call matchadd(group, s:highlight_position(l1, c1, l2, c2, 0))
       elseif group == 'luaInspectSelectedVariable' 
-        call matchadd(group, pattern, 20)
+        call matchadd(group, s:highlight_position(l1, c1, l2, c2, 1), 20)
       else
+        let pattern = s:highlight_position(l1, c1, l2, c2, 1)
         execute 'syntax match' group '/' . pattern . '/'
       endif
     endif
@@ -193,8 +197,11 @@ function! s:rename_variable() " {{{1
   let highlights = []
   for line in b:luainspect_output[1:-1]
     if s:check_output(line, '^\d\+\(\s\+\d\+\)\{2}$')
-      let [linenum, firstcol, lastcol] = split(line)
-      let pattern = s:highlight_position(linenum + 0, firstcol - 1, lastcol + 2)
+      let [l1, c1, c2] = split(line)
+      let l1 += 0
+      let c1 -= 1
+      let c2 += 2
+      let pattern = s:highlight_position(l1, c1, l1, c2, 1)
       call add(highlights, matchadd('IncSearch', pattern))
     endif
   endfor
@@ -233,9 +240,12 @@ function! s:check_output(line, pattern) " {{{1
   endif
 endfunction
 
-function! s:highlight_position(linenum, firstcol, lastcol) " {{{1
-  return printf('\%%%il\%%>%ic\<\w\+\>\%%<%ic', a:linenum, a:firstcol, a:lastcol)
-endfunction
+function! s:highlight_position(l1, c1, l2, c2, ident_only) " {{{1
+  let l1 = a:l1 >= 1 ? (a:l1 - 1) : a:l1
+  let p = '\%>' . l1 . 'l\%>' . a:c1 . 'c'
+  let p .= a:ident_only ? '\<\w\+\>' : '\_.\+'
+  return p . '\%<' . (a:l2 + 1) . 'l\%<' . a:c2 . 'c'
+ endfunction
 
 " Highlighting groups and their default light/dark styles. {{{1
 
