@@ -253,7 +253,7 @@ function! s:rename_variable() " {{{1
   " Clear highlighting of occurrences.
   call map(highlights, 'matchdelete(v:val)')
   " Perform rename?
-  if newname != '' && newname != oldname
+  if newname != '' && newname !=# oldname
     let num_renamed = 0
     for fields in reverse(b:luainspect_output[1:-1])
       let [linenum, firstcol, lastcol] = split(fields)
