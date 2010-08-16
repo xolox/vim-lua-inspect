@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 15, 2010
+ Last Change: August 16, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -53,7 +53,10 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
   -- FIXME Why does this report argument count warnings in luainspect/init.lua but not in example.lua?!
   local warnings = LI.list_warnings(tokenlist, src)
   myprint(#warnings)
-  for i, warning in ipairs(warnings) do myprint(warning) end
+  for i, warning in ipairs(warnings) do
+    warning = warning:gsub('%s+', ' ')
+    myprint(warning)
+  end
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do
     if curvar and curvar.ast.id == token.ast.id then
