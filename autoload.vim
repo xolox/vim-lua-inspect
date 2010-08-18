@@ -184,10 +184,12 @@ function! s:highlight_variables() " {{{1
   for line in other_output
     if s:check_output(line, '^\w\+\(\s\+\d\+\)\{4}$')
       let [group, l1, c1, l2, c2] = split(line)
+      " Convert strings to numbers.
       let l1 += 0
-      let c1 -= 1
       let l2 += 0
-      let c2 += 2
+      " These adjustments were found by trial and error :-|
+      let c1 += 0
+      let c2 += 3 
       if group == 'luaInspectWrongArgCount'
         call matchadd(group, s:highlight_position(l1, c1, l2, c2, 0))
       elseif group == 'luaInspectSelectedVariable' 
@@ -235,9 +237,11 @@ function! s:rename_variable() " {{{1
   for line in b:luainspect_output[1:-1]
     if s:check_output(line, '^\d\+\(\s\+\d\+\)\{2}$')
       let [l1, c1, c2] = split(line)
+      " Convert string to number.
       let l1 += 0
-      let c1 -= 1
-      let c2 += 2
+      " These adjustments were found by trial and error :-|
+      let c1 += 0
+      let c2 += 3
       let pattern = s:highlight_position(l1, c1, l1, c2, 1)
       call add(highlights, matchadd('IncSearch', pattern))
     endif
@@ -254,9 +258,11 @@ function! s:rename_variable() " {{{1
     let num_renamed = 0
     for fields in reverse(b:luainspect_output[1:-1])
       let [linenum, firstcol, lastcol] = split(fields)
+      " Convert string to number.
       let linenum += 0
-      let firstcol -= 2
-      let lastcol += 0
+      " These adjustments were found by trial and error :-|
+      let firstcol -= 1
+      let lastcol += 1
       let line = getline(linenum)
       let prefix = firstcol > 0 ? line[0 : firstcol] : ''
       let suffix = lastcol < len(line) ? line[lastcol : -1] : ''
@@ -282,7 +288,7 @@ function! s:highlight_position(l1, c1, l2, c2, ident_only) " {{{1
   let p = '\%>' . l1 . 'l\%>' . a:c1 . 'c'
   let p .= a:ident_only ? '\<\w\+\>' : '\_.\+'
   return p . '\%<' . (a:l2 + 1) . 'l\%<' . a:c2 . 'c'
- endfunction
+endfunction
 
 " Highlighting groups and their default light/dark styles. {{{1
 

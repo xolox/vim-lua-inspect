@@ -58,8 +58,6 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
       dump(token, 'luaInspectSelectedVariable')
     end
     if token.ast.note and token.ast.note:find '[Tt]oo%s+%w+%s+arguments' then
-      local l1, c1 = unpack(token.ast.lineinfo.first, 1, 2)
-      local l2, c2 = unpack(token.ast.lineinfo.last, 1, 2)
       dump(token, 'luaInspectWrongArgCount')
     end
     if token.tag == 'Id' then
@@ -189,7 +187,8 @@ return function(src)
   local action, file, line, column
   action, file, line, column, src = src:match '^(%S+)\n([^\n]+)\n(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
-  column = tonumber(column)
+  -- This adjustment was found by trial and error :-|
+  column = tonumber(column) - 1
   src = LA.remove_shebang(src)
   -- Quickly parse the source code using loadstring() to check for syntax errors.
   local f, err, linenum, colnum, linenum2 = LA.loadstring(src)
