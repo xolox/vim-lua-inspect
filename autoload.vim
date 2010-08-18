@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 18, 2010
+" Last Change: August 19, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -132,8 +132,6 @@ function! s:parse_text(input, search_path) " {{{1
           throw printf(msg, strtrans(join(b:luainspect_output, "\n")))
         endif
       endtry
-      let message_filter = '^\(status\|warning\):'
-      call filter(b:luainspect_output, 'v:val !~ message_filter')
     else
       redir => output
       silent lua require 'luainspect4vim' (vim.eval 'a:input')
