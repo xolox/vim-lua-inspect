@@ -11,6 +11,7 @@
 
 local LI = require 'luainspect.init'
 local LA = require 'luainspect.ast'
+local LT = require 'luainspect.types'
 local MAX_PREVIEW_KEYS = 20
 local actions = {}
 local myprint
@@ -35,12 +36,6 @@ local function getcurvar(tokenlist, line, column) -- {{{1
       end
     end
   end
-end
-
-local function knownvarorfield(token) -- {{{1
-  local a = token.ast
-  local v = a.seevalue or a
-  return a.definedglobal or v.valueknown and v.value ~= nil
 end
 
 function actions.highlight(tokenlist, line, column, src) -- {{{1
@@ -69,7 +64,7 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
     end
     if token.tag == 'Id' then
       if not token.ast.localdefinition then
-        dump(token, knownvarorfield(token) and 'luaInspectGlobalDefined' or 'luaInspectGlobalUndefined')
+        dump(token, token.ast.definedglobal and 'luaInspectGlobalDefined' or 'luaInspectGlobalUndefined')
       elseif not token.ast.localdefinition.isused then
         dump(token, 'luaInspectLocalUnused')
       elseif token.ast.localdefinition.functionlevel < token.ast.functionlevel then
@@ -82,7 +77,12 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
         dump(token, 'luaInspectLocal')
       end
     elseif token.ast.isfield then
-      dump(token, knownvarorfield(token) and 'luaInspectFieldDefined' or 'luaInspectFieldUndefined')
+      local a = token.ast
+      if a.definedglobal or not LT.istype[a.seevalue.value] and a.seevalue.value ~= nil then
+        dump(token, 'luaInspectFieldDefined')
+      else
+        dump(token, 'luaInspectFieldUndefined')
+      end
     end
   end
 end
