@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 16, 2010
+ Last Change: August 18, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -69,7 +69,7 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
     end
     if token.tag == 'Id' then
       if not token.ast.localdefinition then
-        dump(token, token.ast.definedglobal and 'luaInspectGlobalDefined' or 'luaInspectGlobalUndefined')
+        dump(token, knownvarorfield(token) and 'luaInspectGlobalDefined' or 'luaInspectGlobalUndefined')
       elseif not token.ast.localdefinition.isused then
         dump(token, 'luaInspectLocalUnused')
       elseif token.ast.localdefinition.functionlevel < token.ast.functionlevel then
