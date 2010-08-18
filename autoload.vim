@@ -214,12 +214,8 @@ function! s:update_warnings(warnings) " {{{1
       call add(list, { 'bufnr': bufnr('%'), 'lnum': linenum, 'col': colnum, 'text': message })
     endif
   endfor
-  " Don't update the location list when it hasn't changed, because Vim will
-  " reset the highlighting of the current item in the location list!
-  if !exists('b:luainspect_warnings') || b:luainspect_warnings != list
-    call setloclist(winnr(), list, 'r')
-    let b:luainspect_warnings = list
-  endif
+  call setloclist(winnr(), list)
+  let b:luainspect_warnings = list
   if !empty(list)
     lopen
     if winheight(winnr()) > 4
