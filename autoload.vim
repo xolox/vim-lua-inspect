@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 16, 2010
+" Last Change: August 18, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -167,6 +167,7 @@ endfunction
 
 function! s:clear_previous_matches() " {{{1
   " Clear existing highlighting.
+  call clearmatches()
   for group in keys(s:groups)
     let group = 'luaInspect' . group
     if hlexists(group)
