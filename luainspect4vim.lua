@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 18, 2010
+ Last Change: August 19, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -124,46 +124,28 @@ local function previewtable(ast) -- {{{1
 end
 
 function actions.tooltip(tokenlist, line, column, src) -- {{{1
-  local did_details = false
-  local note
   for i, token in ipairs(tokenlist) do
     local ast = token.ast
     if ast.lineinfo then
       local l1, c1 = unpack(ast.lineinfo.first, 1, 2)
       local l2, c2 = unpack(ast.lineinfo.last, 1, 2)
       if l1 == line then
-        if column >= c1 and column <= c2 then
-          if ast.id and not did_details then
-            local details = LI.get_value_details(ast, tokenlist, src)
-            if details ~= '?' then
-              -- Convert variable type to readable sentence (friendlier to new users IMHO).
-              details = details:gsub('^[^\n]+', function(vartype)
-                vartype = vartype:match '^%s*(.-)%s*$'
-                if vartype:find 'local$' or vartype:find 'global' then
-                  vartype = vartype .. ' ' .. 'variable'
-                end
-                local article = details:find '^[aeiou]' and 'an' or 'a'
-                return "This is " .. article .. ' ' .. vartype .. '.'
-              end)
-              myprint(details)
-            end
-            previewtable(ast)
-            if note then
-              myprint(note)
-              break
-            end
+        if column >= c1 and column <= c2 and ast.id then
+          local details = LI.get_value_details(ast, tokenlist, src)
+          if details ~= '?' then
+            -- Convert variable type to readable sentence (friendlier to new users IMHO).
+            details = details:gsub('^[^\n]+', function(vartype)
+              vartype = vartype:match '^%s*(.-)%s*$'
+              if vartype:find 'local$' or vartype:find 'global' then
+                vartype = vartype .. ' ' .. 'variable'
+              end
+              local article = details:find '^[aeiou]' and 'an' or 'a'
+              return "This is " .. article .. ' ' .. vartype .. '.'
+            end)
+            myprint(details)
           end
-          if ast.note then
-            -- This is complicated by the fact that I don't really understand
-            -- the Metalua/LuaInspect abstract syntax tree and apparently notes
-            -- are not always available on the identifier token printed above.
-            local iswarning = ast.note:find '[Tt]oo%s+%w+%s+arguments'
-            note = (iswarning and "Warning: " or "Note: ") .. ast.note
-            if did_details then
-              myprint(note)
-              break
-            end
-          end
+          previewtable(ast)
+          break
         end
       end
     end
