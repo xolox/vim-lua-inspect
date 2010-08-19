@@ -57,8 +57,21 @@ function actions.highlight(tokenlist, line, column, src) -- {{{1
     if curvar and curvar.ast.id == token.ast.id then
       dump(token, 'luaInspectSelectedVariable')
     end
-    if token.ast.note and token.ast.note:find '[Tt]oo%s+%w+%s+arguments' then
-      dump(token, 'luaInspectWrongArgCount')
+    local ast = token.ast
+    if ast and (ast.seevalue or ast).note then
+      local hast = ast.seevalue or ast
+      if hast.tag == 'Call' then
+        hast = hast[1]
+      elseif hast.tag == 'Invoke' then
+        hast = hast[2]
+      end
+      local fpos, lpos = LA.ast_pos_range(hast, tokenlist)
+      local l1, c1 = LA.pos_to_linecol(fpos, src)
+      local l2, c2 = LA.pos_to_linecol(lpos, src)
+      -- TODO: A bit confusing is that LuaInspect seems to emit both zero-based
+      -- and one-based column numbers (i.e. offsets vs. indices) since the
+      -- included Metalua lexer was patched to fix a rare bug.
+      myprint(('luaInspectWrongArgCount %i %i %i %i'):format(l1, c1 - 1, l2, c2 - 1))
     end
     if token.tag == 'Id' then
       if not token.ast.localdefinition then

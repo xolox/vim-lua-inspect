@@ -5,4 +5,7 @@
  * Check whether "core/SciTE: jump to definition now supports functions in different files." is interesting.
  * Argument count warning tool tips are only shown for parts of the highlighted text. This might have been fixed in recent changes to LuaInspect.
  * Bug: The plug-in sometimes warns `Invalid output from luainspect4vim.lua: 'This is an unknown table field.'`. Mixup between tool tip / highlight response parsing?!
- * Dynamic highlighting using `matchadd()` performs **very** poorly when multiple consecutive lines are highlighted as `SpellLocal` -- so poorly that Vim becomes pretty much unusable until the user disables dynamic highlighting using `:LuaInspect!` (e.g. try editing `luainspect/init.lua` using the Vim plug-in). For this reason I guess only the function names should be highlighted.
+
+# Known issues
+
+ * Dynamic highlighting using Vim's `matchadd()` function performs **very** poorly in large buffers -- so poorly that Vim becomes pretty much unusable until the user disables dynamic highlighting using `:LuaInspect!` (e.g. try editing `luainspect/scite.lua` using the Vim plug-in). I've since switched to highlighting only function names (instead of multiline call expressions) but that hasn't improved performance as much as I'd hoped...
