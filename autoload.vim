@@ -80,7 +80,7 @@ function! luainspect#make_request(action) " {{{1
         call xolox#warning("No variable under cursor!")
       else
         let linenum = b:luainspect_output[1] + 0
-        let colnum = b:luainspect_output[2] + 0
+        let colnum = b:luainspect_output[2] + 1
         call setpos('.', [0, linenum, colnum, 0])
         call xolox#timer#stop("%s: Jumped to definition in %s in %s.", s:script, friendlyname, starttime)
         if &verbose == 0
