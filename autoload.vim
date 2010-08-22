@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 21, 2010
+" Last Change: August 22, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -126,7 +126,9 @@ function! s:prepare_search_path() " {{{1
 endfunction
 
 function! s:parse_text(input, search_path) " {{{1
-  if !(exists('b:luainspect_input') && b:luainspect_input == a:input)
+  if !(exists('b:luainspect_input')
+          \ && exists('b:luainspect_output')
+          \ && b:luainspect_input == a:input)
     if !(has('lua') && g:lua_inspect_internal)
       let template = 'lua -e "%s; require ''luainspect4vim'' (io.read ''*a'')"'
       let command = printf(template, a:search_path)
