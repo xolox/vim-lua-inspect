@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 19, 2010
+" Last Change: August 21, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -38,7 +38,11 @@ endfunction
 
 function! luainspect#make_request(action) " {{{1
   let starttime = xolox#timer#start()
-  let bufname = fnamemodify(bufname(a:action != 'tooltip' ? '%' : v:beval_bufnr), ':p')
+  let bufnr = a:action != 'tooltip' ? bufnr('%') : v:beval_bufnr
+  let bufname = bufname(bufnr)
+  if bufname != ''
+    let bufname = fnamemodify(bufname, ':p')
+  endif
   if a:action == 'tooltip'
     let lines = getbufline(v:beval_bufnr, 1, "$")
     call insert(lines, v:beval_col)
@@ -53,7 +57,11 @@ function! luainspect#make_request(action) " {{{1
   call s:parse_text(join(lines, "\n"), s:prepare_search_path())
   if !empty(b:luainspect_output)
     let response = b:luainspect_output[0]
-    let friendlyname = fnamemodify(bufname, ':~')
+    if bufname == ''
+      let friendlyname = 'buffer #' . bufnr
+    else
+      let friendlyname = fnamemodify(bufname, ':~')
+    endif
     if response == 'syntax_error' && len(b:luainspect_output) >= 4
       " Never perform syntax error highlighting in non-Lua buffers!
       let linenum = b:luainspect_output[1] + 0

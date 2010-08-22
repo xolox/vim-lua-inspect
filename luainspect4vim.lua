@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 19, 2010
+ Last Change: August 21, 2010
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -180,7 +180,7 @@ end
 
 return function(src)
   local action, file, line, column
-  action, file, line, column, src = src:match '^(%S+)\n([^\n]+)\n(%d+)\n(%d+)\n(.*)$'
+  action, file, line, column, src = src:match '^(%S+)\n([^\n]*)\n(%d+)\n(%d+)\n(.*)$'
   line = tonumber(line)
   -- This adjustment was found by trial and error :-|
   column = tonumber(column) - 1
