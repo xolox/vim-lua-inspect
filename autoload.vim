@@ -1,6 +1,6 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 22, 2010
+" Last Change: October 9, 2010
 " URL: http://peterodding.com/code/vim/lua-inspect/
 " License: MIT
 
@@ -233,7 +233,7 @@ function! s:update_warnings(warnings) " {{{1
     endif
     let warnings = len(list) > 1 ? 'warnings' : 'warning'
     let w:quickfix_title = printf('%i %s reported by LuaInspect', len(list), warnings)
-    wincmd w
+    wincmd p
   else
     lclose
   endif
