@@ -79,7 +79,7 @@ The plug-in uses the Lua interface for Vim when available so that it doesn't hav
 
 ## Contact
 
-If you have questions, bug reports, suggestions, etc. the author can be contacted at <peter@peterodding.com>. The latest version is available at <http://peterodding.com/code/vim/lua-inspect/> and <http://github.com/xolox/vim-lua-inspect>. If you like this plug-in please vote for it on [www.vim.org](http://www.vim.org/scripts/script.php?script_id=3169).
+If you have questions, bug reports, suggestions, etc. the author can be contacted at <peter@peterodding.com>. The latest version is available at <http://peterodding.com/code/vim/lua-inspect/> and <http://github.com/xolox/vim-lua-inspect>. If you like this plug-in please vote for it on [Vim Online](http://www.vim.org/scripts/script.php?script_id=3169).
 
 ## License
 
