@@ -2,7 +2,7 @@
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: May 25, 2011
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.4.8
+" Version: 0.4.9
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -25,11 +25,7 @@ endif
 
 if !exists('g:lua_inspect_path')
   " Change this if you want to move the Lua modules somewhere else.
-  if has('win32') || has('win64')
-    let g:lua_inspect_path = '~\vimfiles\misc\luainspect'
-  else
-    let g:lua_inspect_path = '~/.vim/misc/luainspect'
-  endif
+  let g:lua_inspect_path = expand('<sfile>:p:h') . '/../misc/luainspect'
 endif
 
 if !exists('g:lua_inspect_internal')
