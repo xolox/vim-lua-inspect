@@ -1,8 +1,8 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 9, 2010
+" Last Change: May 25, 2011
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" Version: 0.4.7
+" Version: 0.4.8
 " License: MIT
 
 " Support for automatic update using the GLVS plug-in.
@@ -43,16 +43,16 @@ if !exists('g:lua_inspect_internal')
 endif
 
 " This command updates highlighting when automatic highlighting is disabled.
-command! -bar -bang LuaInspect call luainspect#highlight_cmd(<q-bang> == '!')
+command! -bar -bang LuaInspect call xolox#luainspect#highlight_cmd(<q-bang> == '!')
 
 " Automatically enable the plug-in in Lua buffers.
 augroup PluginLuaInspect
-  autocmd! FileType lua call luainspect#auto_enable()
+  autocmd! FileType lua call xolox#luainspect#auto_enable()
 augroup END
 
 " The &balloonexpr option requires a global function.
 function! LuaInspectToolTip()
-  let result = luainspect#make_request('tooltip')
+  let result = xolox#luainspect#make_request('tooltip')
   if exists('b:luainspect_syntax_error')
     return b:luainspect_syntax_error
   else

@@ -20,7 +20,7 @@ The Vim plug-in `luainspect.vim` uses the [LuaInspect](http://lua-users.org/wiki
 
 ## Installation
 
-Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/lua-inspect) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit a Lua file and within a few seconds semantic highlighting should be enabled automatically!
+Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/lua-inspect.zip) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit a Lua file and within a few seconds semantic highlighting should be enabled automatically!
 
 Note that on Windows a command prompt window pops up whenever LuaInspect is run as an external process. If this bothers you then you can install my [shell.vim](http://peterodding.com/code/vim/shell/) plug-in which includes a [DLL](http://en.wikipedia.org/wiki/Dynamic-link_library) that works around this issue. Once you've installed both plug-ins it should work out of the box!
 
