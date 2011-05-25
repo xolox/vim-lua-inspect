@@ -15,7 +15,9 @@ function! xolox#luainspect#auto_enable() " {{{1
     nnoremap <buffer> <silent> <F2> :call xolox#luainspect#make_request('rename')<CR>
     nnoremap <buffer> <silent> gd :call xolox#luainspect#make_request('goto')<CR>
     " Enable balloon evaluation / dynamic tool tips.
-    setlocal ballooneval balloonexpr=LuaInspectToolTip()
+    if has('balloon_eval')
+      setlocal ballooneval balloonexpr=LuaInspectToolTip()
+    endif
     " Install automatic commands to update the highlighting.
     for event in split(g:lua_inspect_events, ',')
       execute 'autocmd!' event '<buffer> LuaInspect'
