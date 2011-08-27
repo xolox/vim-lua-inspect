@@ -1,8 +1,7 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 25, 2011
+" Last Change: June 18, 2011
 " URL: http://peterodding.com/code/vim/lua-inspect/
-" License: MIT
 
 let s:script = expand('<sfile>:p:~')
 

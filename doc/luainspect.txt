@@ -32,7 +32,7 @@ following features are currently supported:
 
     Screenshot of semantic highlighting, see reference [5]
 
-==============================================================================
+===============================================================================
                                                        *luainspect-installation*
 Installation ~
 
@@ -47,7 +47,7 @@ run as an external process. If this bothers you then you can install my
 shell.vim [7] plug-in which includes a DLL [8] that works around this issue.
 Once you've installed both plug-ins it should work out of the box!
 
-==============================================================================
+===============================================================================
                                                               *luainspect-usage*
 Usage ~
 
@@ -55,12 +55,11 @@ When you open any Lua file the semantic highlighting should be enabled
 automatically within a few seconds, so you don't have to configure anything if
 you're happy with the defaults.
 
-------------------------------------------------------------------------------
-                                                           *:luainspect-command*
-The ':LuaInspect' command ~
+-------------------------------------------------------------------------------
+The *:LuaInspect* command
 
 You don't need to use this command unless you've disabled automatic
-highlighting using 'g:lua_inspect_events'. When you execute this command the
+highlighting using |g:lua_inspect_events|. When you execute this command the
 plug-in runs the LuaInspect tool and then highlights all variables in the
 current buffer using one of the following highlighting groups:
 
@@ -91,12 +90,11 @@ current buffer using one of the following highlighting groups:
 If you don't like one or more of the default styles the Vim documentation
 describes how to change them (see |:hi-default|). If you want to disable the
 semantic highlighting in a specific Vim buffer execute ':LuaInspect!' in that
-buffer. When you want to reenable the highlighting execute ':LuaInspect'
+buffer. When you want to reenable the highlighting execute |:LuaInspect|
 again, but now without the bang (see |:command-bang|).
 
-------------------------------------------------------------------------------
-                                                    *g:loaded_luainspect-option*
-The 'g:loaded_luainspect' option ~
+-------------------------------------------------------------------------------
+The *g:loaded_luainspect* option
 
 This variable isn't really an option but if you want to avoid loading the
 'luainspect.vim' plug-in you can set this variable to any value in your |vimrc|
@@ -104,9 +102,8 @@ script:
 >
     :let g:loaded_luainspect = 1
 
-------------------------------------------------------------------------------
-                                      *luainspect-g:lua_inspect_warnings-option*
-The 'g:lua_inspect_warnings' option ~
+-------------------------------------------------------------------------------
+The *g:lua_inspect_warnings* option
 
 When LuaInspect reports warnings about unused variables, wrong argument
 counts, etc. they are automatically shown in a location list window (see
@@ -114,9 +111,8 @@ counts, etc. they are automatically shown in a location list window (see
 >
     :let g:lua_inspect_warnings = 0
 
-------------------------------------------------------------------------------
-                                        *luainspect-g:lua_inspect_events-option*
-The 'g:lua_inspect_events' option ~
+-------------------------------------------------------------------------------
+The *g:lua_inspect_events* option
 
 By default semantic highlighting is automatically enabled after a short
 timeout and when you save a buffer. If you want to disable automatic
@@ -124,17 +120,16 @@ highlighting altogether add the following to your |vimrc| script:
 >
     :let g:lua_inspect_events = ''
 
-You can also add events, for example if you also want to run ':LuaInspect' the
+You can also add events, for example if you also want to run |:LuaInspect| the
 moment you edit a Lua file then try this:
 >
     :let g:lua_inspect_events = 'CursorHold,CursorHoldI,BufReadPost,BufWritePost'
 
 Note that this only works when the plug-in is loaded (or reloaded) after
-setting the 'g:lua_inspect_events' option.
+setting the |g:lua_inspect_events| option.
 
-------------------------------------------------------------------------------
-                                      *luainspect-g:lua_inspect_internal-option*
-The 'g:lua_inspect_internal' option ~
+-------------------------------------------------------------------------------
+The *g:lua_inspect_internal* option
 
 The plug-in uses the Lua interface for Vim when available so that it doesn't
 have to run LuaInspect as an external program (which can slow things down). If
@@ -143,7 +138,7 @@ variable to false (0) in your |vimrc| script:
 >
     :let g:lua_inspect_internal = 0
 
-==============================================================================
+===============================================================================
                                                             *luainspect-contact*
 Contact ~
 
@@ -152,14 +147,14 @@ contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/lua-inspect/ and http://github.com/xolox/vim-lua-inspect.
 If you like this plug-in please vote for it on Vim Online [9].
 
-==============================================================================
+===============================================================================
                                                             *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [10]. Copyright 2010 Peter
+This software is licensed under the MIT license [10]. Copyright 2011 Peter
 Odding <peter@peterodding.com>.
 
-==============================================================================
+===============================================================================
                                                          *luainspect-references*
 References ~
 
