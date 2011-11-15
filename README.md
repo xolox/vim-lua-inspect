@@ -45,7 +45,18 @@ You don't need to use this command unless you've disabled automatic highlighting
  * <span style="border-bottom: 1px dotted green">luaInspectWrongArgCount</span>
  * <span style="border-bottom: 1px dotted red">luaInspectSyntaxError</span>
 
-If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to reenable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
+If you don't like one or more of the default styles the Vim documentation [describes how to change them](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:hi-default). If you want to disable the semantic highlighting in a specific Vim buffer execute `:LuaInspect!` in that buffer. When you want to re-enable the highlighting execute `:LuaInspect` again, but now without the [bang](http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang).
+
+### The `:LuaInspectToggle` command
+
+By default the semantic highlighting and the warning messages in the location list window are automatically applied to Lua buffers and updated every once in a while, but this can be disabled by setting `g:lua_inspect_events` to an empty string in your [vimrc script] [vimrc]. If the plug-in is not automatically enabled then it may be useful to enable/disable it using a key mapping. That's what the `:LuaInspectToggle` command is for. You still have to define your key mapping of choice in your [vimrc script] [vimrc] though. For example:
+
+    " Don't enable the lua-inspect plug-in automatically in Lua buffers.
+    let g:lua_inspect_events = ''
+
+    " Enable/disable the lua-inspect plug-in manually using <F6>.
+    imap <F6> <C-o>:LuaInspectToggle<CR>
+    nmap <F6>      :LuaInspectToggle<CR>
 
 ### The `g:loaded_luainspect` option
 

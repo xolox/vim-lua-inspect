@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 27, 2011
+" Last Change: November 15, 2011
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
 " Support for automatic update using the GLVS plug-in.
@@ -36,8 +36,11 @@ if !exists('g:lua_inspect_internal')
   let g:lua_inspect_internal = has('lua')
 endif
 
-" This command updates highlighting when automatic highlighting is disabled.
+" This command enables/updates highlighting when automatic highlighting is disabled.
 command! -bar -bang LuaInspect call xolox#luainspect#highlight_cmd(<q-bang> == '!')
+
+" This command can be used as a toggle to enable/disable the highlighting.
+command! -bar LuaInspectToggle call xolox#luainspect#toggle_cmd()
 
 " Automatically enable the plug-in in Lua buffers.
 augroup PluginLuaInspect
