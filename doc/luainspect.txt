@@ -99,11 +99,10 @@ The *:LuaInspectToggle* command
 By default the semantic highlighting and the warning messages in the location
 list window are automatically applied to Lua buffers and updated every once in
 a while, but this can be disabled by setting |g:lua_inspect_events| to an
-empty string in your [vimrc script] [vimrc]. If the plug-in is not
-automatically enabled then it may be useful to enable/disable it using a key
-mapping. That's what the |:LuaInspectToggle| command is for. You still have to
-define your key mapping of choice in your [vimrc script] [vimrc] though. For
-example:
+empty string in your |vimrc| script. If the plug-in is not automatically enabled
+then it may be useful to enable/disable it using a key mapping. That's what
+the |:LuaInspectToggle| command is for. You still have to define your key
+mapping of choice in your |vimrc| script though. For example:
 >
     " Don't enable the lua-inspect plug-in automatically in Lua buffers.
     let g:lua_inspect_events = ''

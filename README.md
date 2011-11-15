@@ -96,3 +96,6 @@ If you have questions, bug reports, suggestions, etc. the author can be contacte
 
 This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).  
 © 2011 Peter Odding &lt;<peter@peterodding.com>&gt;.
+
+
+[vimrc]: http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc
