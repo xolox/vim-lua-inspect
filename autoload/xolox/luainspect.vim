@@ -1,9 +1,9 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 21, 2011
+" Last Change: November 24, 2011
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.4.15'
+let g:xolox#luainspect#version = '0.4.16'
 
 function! xolox#luainspect#toggle_cmd() " {{{1
   if !(exists('b:luainspect_disabled') && b:luainspect_disabled)
@@ -144,14 +144,10 @@ function! s:parse_text(input, search_path) " {{{1
       let template = 'lua -e "%s; require ''luainspect4vim'' (io.read ''*a'')"'
       let command = printf(template, a:search_path)
       try
-        let b:luainspect_output = xolox#shell#execute(command, 1, a:input)
-      catch /^Vim\%((\a\+)\)\=:E117/
-        " Ignore missing shell.vim plug-in.
-        let b:luainspect_output = split(system(command, a:input), "\n")
-        if v:shell_error
-          let msg = "luainspect.vim %s: Failed to execute LuaInspect as external process! %s"
-          throw printf(msg, g:xolox#luainspect#version, strtrans(join(b:luainspect_output, "\n")))
-        endif
+        let b:luainspect_output = xolox#misc#os#exec(command, a:input)
+      catch
+        let msg = "luainspect.vim %s: Failed to execute LuaInspect as external process! %s"
+        throw printf(msg, g:xolox#luainspect#version, strtrans(join(b:luainspect_output, "\n")))
       endtry
     else
       redir => output
