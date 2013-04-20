@@ -1,5 +1,25 @@
 *luainspect.txt*  Semantic highlighting for Lua in Vim
 
+===============================================================================
+                                                           *luainspect-contents*
+Contents ~
+
+ 1. Introduction                                       |luainspect-introduction|
+ 2. Installation                                       |luainspect-installation|
+ 3. Usage                                                     |luainspect-usage|
+  1. The |:LuaInspect| command
+  2. The |:LuaInspectToggle| command
+  3. The |g:loaded_luainspect| option
+  4. The |g:lua_inspect_warnings| option
+  5. The |g:lua_inspect_events| option
+  6. The |g:lua_inspect_internal| option
+ 4. Contact                                                 |luainspect-contact|
+ 5. License                                                 |luainspect-license|
+
+===============================================================================
+                                                       *luainspect-introduction*
+Introduction ~
+
 The Vim plug-in 'luainspect.vim' uses the LuaInspect [1] tool to
 (automatically) perform semantic highlighting of variables in Lua source code.
 It was inspired by lua2-mode [2] (for Emacs [3]) and the SciTE [4] plug-in
@@ -169,7 +189,7 @@ If you like this plug-in please vote for it on Vim Online [9].
                                                             *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [10]. Copyright 2011 Peter
+This software is licensed under the MIT license [10]. Copyright 2013 Peter
 Odding <peter@peterodding.com>.
 
 ===============================================================================
