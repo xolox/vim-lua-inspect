@@ -1,9 +1,9 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 20, 2013
+" Last Change: April 28, 2013
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.4.17'
+let g:xolox#luainspect#version = '0.4.18'
 
 call xolox#misc#compat#check('lua-inspect', 1)
 
