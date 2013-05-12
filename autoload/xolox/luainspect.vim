@@ -3,7 +3,7 @@
 " Last Change: May 12, 2013
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.4.20'
+let g:xolox#luainspect#version = '0.4.21'
 
 call xolox#misc#compat#check('lua-inspect', 2)
 
@@ -145,11 +145,12 @@ function! s:parse_text(input, search_path) " {{{1
     if !(has('lua') && g:lua_inspect_internal)
       let template = 'lua -e "%s; require ''luainspect4vim'' (io.read ''*a'')"'
       let command = printf(template, a:search_path)
+      call xolox#misc#msg#debug("luainspect.vim %s: Executing LuaInspect as external process using command: %s", g:xolox#luainspect#version, command)
       try
         let b:luainspect_output = xolox#misc#os#exec(command, a:input)
       catch
-        let msg = "luainspect.vim %s: Failed to execute LuaInspect as external process! %s"
-        throw printf(msg, g:xolox#luainspect#version, strtrans(join(b:luainspect_output, "\n")))
+        let msg = "luainspect.vim %s: Failed to execute LuaInspect as external process! Use ':verbose LuaInspect' to see the command line of the external process."
+        throw printf(msg, g:xolox#luainspect#version)
       endtry
     else
       redir => output
