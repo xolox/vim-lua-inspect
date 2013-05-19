@@ -189,8 +189,8 @@ If you like this plug-in please vote for it on Vim Online [9].
                                                             *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [10]. Copyright 2013 Peter
-Odding <peter@peterodding.com>.
+This software is licensed under the MIT license [10]. ÂŠ 2013 Peter Odding
+<peter@peterodding.com>.
 
 ===============================================================================
                                                          *luainspect-references*
