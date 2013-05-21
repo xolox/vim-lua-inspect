@@ -1,3 +1,9 @@
+" This Vim script was modified by a Python script that I use to manage the
+" inclusion of miscellaneous functions in the plug-ins that I publish to Vim
+" Online and GitHub. Please don't edit this file, instead make your changes on
+" the 'dev' branch of the git repository (thanks!). This file was generated on
+" May 21, 2013 at 02:58.
+
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: May 21, 2013
@@ -48,7 +54,7 @@ function! xolox#luainspect#highlight_cmd(disable) " {{{1
 endfunction
 
 function! xolox#luainspect#make_request(action) " {{{1
-  let starttime = xolox#misc#timer#start()
+  let starttime = xolox#luainspect#misc#timer#start()
   let bufnr = a:action != 'tooltip' ? bufnr('%') : v:beval_bufnr
   let bufname = bufname(bufnr)
   if bufname != ''
@@ -83,9 +89,9 @@ function! xolox#luainspect#make_request(action) " {{{1
         let error_cmd = 'syntax match luaInspectSyntaxError /\%%>%il\%%<%il.*/ containedin=ALLBUT,lua*Comment*'
         execute printf(error_cmd, linenum - 1, (linenum2 ? linenum2 : line('$')) + 1)
       endif
-      call xolox#misc#timer#stop("luainspect.vim %s: Found a syntax error in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
+      call xolox#luainspect#misc#timer#stop("luainspect.vim %s: Found a syntax error in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
       " But always let the user know that a syntax error exists.
-      call xolox#misc#msg#warn("luainspect.vim %s: Syntax error around line %i in %s: %s", g:xolox#luainspect#version, linenum, friendlyname, b:luainspect_syntax_error)
+      call xolox#luainspect#misc#msg#warn("luainspect.vim %s: Syntax error around line %i in %s: %s", g:xolox#luainspect#version, linenum, friendlyname, b:luainspect_syntax_error)
       return
     endif
     unlet! b:luainspect_syntax_error
@@ -93,15 +99,15 @@ function! xolox#luainspect#make_request(action) " {{{1
       call s:define_default_styles()
       call s:clear_previous_matches()
       call s:highlight_variables()
-      call xolox#misc#timer#stop("luainspect.vim %s: Highlighted variables in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
+      call xolox#luainspect#misc#timer#stop("luainspect.vim %s: Highlighted variables in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
     elseif response == 'goto'
       if len(b:luainspect_output) < 3
-        call xolox#misc#msg#warn("luainspect.vim %s: No variable under cursor!", g:xolox#luainspect#version)
+        call xolox#luainspect#misc#msg#warn("luainspect.vim %s: No variable under cursor!", g:xolox#luainspect#version)
       else
         let linenum = b:luainspect_output[1] + 0
         let colnum = b:luainspect_output[2] + 1
         call setpos('.', [0, linenum, colnum, 0])
-        call xolox#misc#timer#stop("luainspect.vim %s: Jumped to definition in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
+        call xolox#luainspect#misc#timer#stop("luainspect.vim %s: Jumped to definition in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
         if &verbose == 0
           " Clear previous "No variable under cursor!" message to avoid confusion.
           redraw | echo ""
@@ -109,15 +115,15 @@ function! xolox#luainspect#make_request(action) " {{{1
       endif
     elseif response == 'tooltip'
       if len(b:luainspect_output) > 1
-        call xolox#misc#timer#stop("luainspect.vim %s: Rendered tool tip for %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
+        call xolox#luainspect#misc#timer#stop("luainspect.vim %s: Rendered tool tip for %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
         return join(b:luainspect_output[1:-1], "\n")
       endif
     elseif response == 'rename'
       if len(b:luainspect_output) > 1
-        call xolox#misc#timer#stop("luainspect.vim %s: Prepared for rename in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
+        call xolox#luainspect#misc#timer#stop("luainspect.vim %s: Prepared for rename in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
         call s:rename_variable()
       else
-        call xolox#misc#msg#warn("luainspect.vim %s: No variable under cursor!", g:xolox#luainspect#version)
+        call xolox#luainspect#misc#msg#warn("luainspect.vim %s: No variable under cursor!", g:xolox#luainspect#version)
       endif
     endif
   endif
@@ -143,9 +149,9 @@ function! s:parse_text(input, search_path) " {{{1
     if !(has('lua') && g:lua_inspect_internal)
       let template = 'lua -e "%s; require ''luainspect4vim'' (io.read ''*a'')"'
       let command = printf(template, a:search_path)
-      call xolox#misc#msg#debug("luainspect.vim %s: Executing LuaInspect as external process using command: %s", g:xolox#luainspect#version, command)
+      call xolox#luainspect#misc#msg#debug("luainspect.vim %s: Executing LuaInspect as external process using command: %s", g:xolox#luainspect#version, command)
       try
-        let b:luainspect_output = xolox#misc#os#exec({'command': command . ' 2>&1', 'stdin': a:input})['stdout']
+        let b:luainspect_output = xolox#luainspect#misc#os#exec({'command': command . ' 2>&1', 'stdin': a:input})['stdout']
       catch
         let msg = "luainspect.vim %s: Failed to execute LuaInspect as external process! Use ':verbose LuaInspect' to see the command line of the external process."
         throw printf(msg, g:xolox#luainspect#version)
@@ -286,7 +292,7 @@ function! s:rename_variable() " {{{1
       let num_renamed += 1
     endfor
     let msg = "luainspect.vim %s: Renamed %i occurrences of %s to %s"
-    call xolox#misc#msg#info(msg, g:xolox#luainspect#version, num_renamed, oldname, newname)
+    call xolox#luainspect#misc#msg#info(msg, g:xolox#luainspect#version, num_renamed, oldname, newname)
   endif
 endfunction
 
@@ -294,7 +300,7 @@ function! s:check_output(line, pattern) " {{{1
   if match(a:line, a:pattern) >= 0
     return 1
   else
-    call xolox#misc#msg#warn("luainspect.vim %s: Invalid output from luainspect4vim.lua: '%s'", g:xolox#luainspect#version, strtrans(a:line))
+    call xolox#luainspect#misc#msg#warn("luainspect.vim %s: Invalid output from luainspect4vim.lua: '%s'", g:xolox#luainspect#version, strtrans(a:line))
     return 0
   endif
 endfunction
