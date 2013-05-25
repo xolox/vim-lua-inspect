@@ -56,15 +56,24 @@ following features are currently supported:
                                                        *luainspect-installation*
 Installation ~
 
-Unzip the most recent ZIP archive [6] file inside your Vim profile directory
-(usually this is '~/.vim' on UNIX and '%USERPROFILE%\vimfiles' on Windows),
-restart Vim and execute the command ':helptags ~/.vim/doc' (use ':helptags
-~\vimfiles\doc' instead on Windows). Now try it out: Edit a Lua file and
-within a few seconds semantic highlighting should be enabled automatically!
+Please note that the vim-lua-inspect plug-in requires my vim-misc plug-in
+which is separately distributed.
+
+Unzip the most recent ZIP archives of the vim-lua-inspect [6] and vim-misc [7]
+plug-ins inside your Vim profile directory (usually this is '~/.vim' on UNIX
+and '%USERPROFILE%\vimfiles' on Windows), restart Vim and execute the command
+':helptags ~/.vim/doc' (use ':helptags ~\vimfiles\doc' instead on Windows).
+
+If you prefer you can also use Pathogen [8], Vundle [9] or a similar tool to
+install & update the vim-lua-inspect [10] and vim-misc [11] plug-ins using a
+local clone of the git repository.
+
+Now try it out: Edit a Lua file and within a few seconds semantic highlighting
+should be enabled automatically!
 
 Note that on Windows a command prompt window pops up whenever LuaInspect is
 run as an external process. If this bothers you then you can install my
-shell.vim [7] plug-in which includes a DLL [8] that works around this issue.
+shell.vim [12] plug-in which includes a DLL [13] that works around this issue.
 Once you've installed both plug-ins it should work out of the box!
 
 ===============================================================================
@@ -111,7 +120,7 @@ If you don't like one or more of the default styles the Vim documentation
 describes how to change them (see |:hi-default|). If you want to disable the
 semantic highlighting in a specific Vim buffer execute ':LuaInspect!' in that
 buffer. When you want to re-enable the highlighting execute |:LuaInspect|
-again, but now without the bang (see |:command-bang|).
+again, but now without the bang (!) (see |:command-bang|).
 
 -------------------------------------------------------------------------------
 The *:LuaInspectToggle* command
@@ -183,14 +192,14 @@ Contact ~
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/lua-inspect/ and http://github.com/xolox/vim-lua-inspect.
-If you like this plug-in please vote for it on Vim Online [9].
+If you like this plug-in please vote for it on Vim Online [14].
 
 ===============================================================================
                                                             *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [10]. ÂŠ 2013 Peter Odding
-<peter@peterodding.com>.
+This software is licensed under the MIT license [15]. Copyright 2013 Peter
+Odding <peter@peterodding.com>.
 
 ===============================================================================
                                                          *luainspect-references*
@@ -202,9 +211,14 @@ References ~
 [4] http://www.scintilla.org/SciTE.html
 [5] http://peterodding.com/code/vim/luainspect/screenshot.png
 [6] http://peterodding.com/code/vim/downloads/lua-inspect.zip
-[7] http://peterodding.com/code/vim/shell/
-[8] http://en.wikipedia.org/wiki/Dynamic-link_library
-[9] http://www.vim.org/scripts/script.php?script_id=3169
-[10] http://en.wikipedia.org/wiki/MIT_License
+[7] http://peterodding.com/code/vim/downloads/misc.zip
+[8] http://www.vim.org/scripts/script.php?script_id=2332
+[9] https://github.com/gmarik/vundle
+[10] http://github.com/xolox/vim-lua-inspect
+[11] http://github.com/xolox/vim-misc
+[12] http://peterodding.com/code/vim/shell/
+[13] http://en.wikipedia.org/wiki/Dynamic-link_library
+[14] http://www.vim.org/scripts/script.php?script_id=3169
+[15] http://en.wikipedia.org/wiki/MIT_License
 
 vim: ft=help
