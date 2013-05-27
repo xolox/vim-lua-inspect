@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: August 21, 2010
+ Last Change: May 27, 2013
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -152,7 +152,7 @@ function actions.tooltip(tokenlist, line, column, src) -- {{{1
   end
 end
 
-function actions.goto(tokenlist, line, column) -- {{{1
+function actions.go_to(tokenlist, line, column) -- {{{1
   -- FIXME This only jumps to declaration of local / 1st occurrence of global.
   local curvar = getcurvar(tokenlist, line, column)
   for i, token in ipairs(tokenlist) do

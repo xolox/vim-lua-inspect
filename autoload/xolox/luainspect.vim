@@ -1,9 +1,9 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 25, 2013
+" Last Change: May 27, 2013
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.4.26'
+let g:xolox#luainspect#version = '0.4.27'
 
 function! xolox#luainspect#toggle_cmd() " {{{1
   if !(exists('b:luainspect_disabled') && b:luainspect_disabled)
@@ -22,7 +22,7 @@ function! xolox#luainspect#auto_enable() " {{{1
     " Define buffer local mappings for rename / goto definition features.
     inoremap <buffer> <silent> <F2> <C-o>:call xolox#luainspect#make_request('rename')<CR>
     nnoremap <buffer> <silent> <F2> :call xolox#luainspect#make_request('rename')<CR>
-    nnoremap <buffer> <silent> gd :call xolox#luainspect#make_request('goto')<CR>
+    nnoremap <buffer> <silent> gd :call xolox#luainspect#make_request('go_to')<CR>
     " Enable balloon evaluation / dynamic tool tips.
     if has('balloon_eval')
       setlocal ballooneval balloonexpr=LuaInspectToolTip()
@@ -94,7 +94,7 @@ function! xolox#luainspect#make_request(action) " {{{1
       call s:clear_previous_matches()
       call s:highlight_variables()
       call xolox#misc#timer#stop("luainspect.vim %s: Highlighted variables in %s in %s.", g:xolox#luainspect#version, friendlyname, starttime)
-    elseif response == 'goto'
+    elseif response == 'go_to'
       if len(b:luainspect_output) < 3
         call xolox#misc#msg#warn("luainspect.vim %s: No variable under cursor!", g:xolox#luainspect#version)
       else
