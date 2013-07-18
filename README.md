@@ -103,6 +103,8 @@ If you have questions, bug reports, suggestions, etc. the author can be contacte
 This software is licensed under the [MIT license] [mit].  
 © 2013 Peter Odding &lt;<peter@peterodding.com>&gt;.
 
+The source code repository and distributions contain bundled copies of
+LuaInspect and Metalua, please refer to their licenses (also included).
 
 [bang]: http://vimdoc.sourceforge.net/htmldoc/map.html#:command-bang
 [cursorline]: http://vimdoc.sourceforge.net/htmldoc/options.html#%27cursorline%27

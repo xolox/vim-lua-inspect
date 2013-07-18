@@ -191,6 +191,9 @@ License ~
 This software is licensed under the MIT license [15]. © 2013 Peter Odding
 <peter@peterodding.com>.
 
+The source code repository and distributions contain bundled copies of
+LuaInspect and Metalua, please refer to their licenses (also included).
+
 ===============================================================================
                                                         *luainspect-references*
 References ~
