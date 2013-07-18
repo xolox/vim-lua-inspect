@@ -1,9 +1,9 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 27, 2013
+" Last Change: July 18, 2013
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.4.27'
+let g:xolox#luainspect#version = '0.5'
 
 function! xolox#luainspect#toggle_cmd() " {{{1
   if !(exists('b:luainspect_disabled') && b:luainspect_disabled)
@@ -126,8 +126,16 @@ endfunction
 function! s:prepare_search_path() " {{{1
   let code = ''
   if !(has('lua') && g:lua_inspect_internal && exists('s:changed_path'))
-    let template = 'package.path = ''%s/?.lua;'' .. package.path'
-    let code = printf(template, escape(expand(g:lua_inspect_path), '"\'''))
+    let root = xolox#misc#path#absolute(g:lua_inspect_path)
+    let directories = [root]
+    call add(directories, xolox#misc#path#merge(root, 'metalualib'))
+    call add(directories, xolox#misc#path#merge(root, 'luainspect'))
+    let template = "package.path = package.path .. ';%s/?.lua'"
+    let lines = []
+    for directory in directories
+      call add(lines, printf(template, escape(directory, '"\''')))
+    endfor
+    let code = join(lines, '; ')
     if has('lua') && g:lua_inspect_internal
       execute 'lua' code
       let s:changed_path = 1

@@ -22,5 +22,7 @@ THE SOFTWARE.
 
 ===============================================================================
 
-Uses Metalua libraries (see metalua/LICENSE).
-Uses jquery (see COPYRIGHT-jquery).
+Uses Metalua libraries (see metalualib/LICENSE).
+Uses jquery (see COPYRIGHT-jquery)
+Uses ExtMan (see COPYRIGHT-extman)
+

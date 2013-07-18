@@ -3,7 +3,7 @@
  This module is part of the luainspect.vim plug-in for the Vim text editor.
 
  Author: Peter Odding <peter@peterodding.com>
- Last Change: May 27, 2013
+ Last Change: July 18, 2013
  URL: http://peterodding.com/code/vim/lua-inspect/
  License: MIT
 
@@ -202,7 +202,7 @@ return function(src)
   if not ast then return end
   -- Create a list of tokens from the AST and decorate it using LuaInspect.
   local tokenlist = LA.ast_to_tokenlist(ast, src)
-  LI.inspect(ast, tokenlist)
+  LI.inspect(ast, tokenlist, src)
   -- Branch on the requested action.
   if actions[action] then
     myprint(action)
