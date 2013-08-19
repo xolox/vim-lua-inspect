@@ -188,7 +188,7 @@ lua-inspect. If you like this plug-in please vote for it on Vim Online [14].
                                                            *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [15]. © 2013 Peter Odding
+This software is licensed under the MIT license [15]. ÂŠ 2013 Peter Odding
 <peter@peterodding.com>.
 
 The source code repository and distributions contain bundled copies of
