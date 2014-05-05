@@ -55,6 +55,12 @@ command! -bar -bang LuaInspect call xolox#luainspect#highlight_cmd(<q-bang> == '
 " This command can be used as a toggle to enable/disable the highlighting.
 command! -bar LuaInspectToggle call xolox#luainspect#toggle_cmd()
 
+" This command call rename
+command! -bar LuaInspectRename call xolox#luainspect#make_request('rename')
+
+" This command goto definition features
+command! -bar LuaInspectGoto call xolox#luainspect#make_request('go_to')
+
 " Automatically enable the plug-in in Lua buffers.
 augroup PluginLuaInspect
   autocmd! FileType lua call xolox#luainspect#auto_enable()
