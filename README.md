@@ -34,6 +34,8 @@ Note that on Windows a command prompt window pops up whenever LuaInspect is run 
 
 When you open any Lua file the semantic highlighting should be enabled automatically within a few seconds, so you don't have to configure anything if you're happy with the defaults.
 
+## Commands
+
 ### The `:LuaInspect` command
 
 You don't need to use this command unless you've disabled automatic highlighting using `g:lua_inspect_events`. When you execute this command the plug-in runs the LuaInspect tool and then highlights all variables in the current buffer using one of the following highlighting groups:
@@ -64,11 +66,26 @@ By default the semantic highlighting and the warning messages in the location li
     imap <F6> <C-o>:LuaInspectToggle<CR>
     nmap <F6>      :LuaInspectToggle<CR>
 
+### The `:LuaInspectRename` command
+
+This command renames the variable under the cursor. It's used to define the `<F2>` mapping and can be used if you don't like the default mappings and want to define your own.
+
+### The `:LuaInspectGoTo` command
+
+This command jumps to the definition of the variable under the cursor. It's used to define the `gd` mapping and can be used if you don't like the default mappings and want to define your own.
+
+## Options
+
 ### The `g:loaded_luainspect` option
 
 This variable isn't really an option but if you want to avoid loading the `luainspect.vim` plug-in you can set this variable to any value in your [vimrc script] [vimrc]:
 
     :let g:loaded_luainspect = 1
+
+
+### The `g:lua_inspect_mappings` option
+
+If this is set to true (1, the default value) then the `<F2>` and `gd` mappings are defined in Lua buffers (as buffer local mappings). You can set it to false (0) to disable the default mappings (so you can define your own).
 
 ### The `g:lua_inspect_warnings` option
 
@@ -100,8 +117,8 @@ If you have questions, bug reports, suggestions, etc. the author can be contacte
 
 ## License
 
-This software is licensed under the [MIT license] [mit].  
-© 2013 Peter Odding &lt;<peter@peterodding.com>&gt;.
+This software is licensed under the [MIT license] [mit].
+© 2014 Peter Odding &lt;<peter@peterodding.com>&gt;.
 
 The source code repository and distributions contain bundled copies of
 LuaInspect and Metalua, please refer to their licenses (also included).

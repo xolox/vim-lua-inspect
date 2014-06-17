@@ -1,9 +1,9 @@
 " Vim script.
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 19, 2013
+" Last Change: June 17, 2014
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
-let g:xolox#luainspect#version = '0.5.1'
+let g:xolox#luainspect#version = '0.5.2'
 
 function! xolox#luainspect#toggle_cmd() " {{{1
   if !(exists('b:luainspect_disabled') && b:luainspect_disabled)
@@ -20,9 +20,11 @@ function! xolox#luainspect#auto_enable() " {{{1
     " Disable easytags.vim because it doesn't play nice with luainspect.vim!
     let b:easytags_nohl = 1
     " Define buffer local mappings for rename / goto definition features.
-    inoremap <buffer> <silent> <F2> <C-o>:call xolox#luainspect#make_request('rename')<CR>
-    nnoremap <buffer> <silent> <F2> :call xolox#luainspect#make_request('rename')<CR>
-    nnoremap <buffer> <silent> gd :call xolox#luainspect#make_request('go_to')<CR>
+    if g:lua_inspect_mappings
+      inoremap <buffer> <silent> <F2> <C-o>:LuaInspectRename<CR>
+      nnoremap <buffer> <silent> <F2> :LuaInspectRename<CR>
+      nnoremap <buffer> <silent> gd :LuaInspectGoTo<CR>
+    endif
     " Enable balloon evaluation / dynamic tool tips.
     if has('balloon_eval')
       setlocal ballooneval balloonexpr=LuaInspectToolTip()

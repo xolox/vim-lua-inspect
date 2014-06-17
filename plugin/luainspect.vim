@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 19, 2013
+" Last Change: June 17, 2014
 " URL: http://peterodding.com/code/vim/lua-inspect/
 
 " Support for automatic update using the GLVS plug-in.
@@ -23,6 +23,11 @@ catch
   let g:loaded_luainspect = 1
   finish
 endtry
+
+if !exists('g:lua_inspect_mappings')
+  " Change this to disable default key mappings.
+  let g:lua_inspect_mappings = 1
+endif
 
 if !exists('g:lua_inspect_warnings')
   " Change this to disable automatic warning messages.
@@ -54,6 +59,12 @@ command! -bar -bang LuaInspect call xolox#luainspect#highlight_cmd(<q-bang> == '
 
 " This command can be used as a toggle to enable/disable the highlighting.
 command! -bar LuaInspectToggle call xolox#luainspect#toggle_cmd()
+
+" This command can be used to rename variables.
+command! -bar LuaInspectRename call xolox#luainspect#make_request('rename')
+
+" This command can be used to jump to a variable's definition.
+command! -bar LuaInspectGoTo call xolox#luainspect#make_request('go_to')
 
 " Automatically enable the plug-in in Lua buffers.
 augroup PluginLuaInspect

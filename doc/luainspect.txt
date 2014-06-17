@@ -6,15 +6,20 @@ Contents ~
  1. Introduction                                      |luainspect-introduction|
  2. Installation                                      |luainspect-installation|
  3. Usage                                                    |luainspect-usage|
+ 4. Commands                                              |luainspect-commands|
   1. The |:LuaInspect| command
   2. The |:LuaInspectToggle| command
-  3. The |g:loaded_luainspect| option
-  4. The |g:lua_inspect_warnings| option
-  5. The |g:lua_inspect_events| option
-  6. The |g:lua_inspect_internal| option
- 4. Contact                                                |luainspect-contact|
- 5. License                                                |luainspect-license|
- 6. References                                          |luainspect-references|
+  3. The |:LuaInspectRename| command
+  4. The |:LuaInspectGoTo| command
+ 5. Options                                                |luainspect-options|
+  1. The |g:loaded_luainspect| option
+  2. The |g:lua_inspect_mappings| option
+  3. The |g:lua_inspect_warnings| option
+  4. The |g:lua_inspect_events| option
+  5. The |g:lua_inspect_internal| option
+ 6. Contact                                                |luainspect-contact|
+ 7. License                                                |luainspect-license|
+ 8. References                                          |luainspect-references|
 
 ===============================================================================
                                                       *luainspect-introduction*
@@ -85,6 +90,10 @@ When you open any Lua file the semantic highlighting should be enabled
 automatically within a few seconds, so you don't have to configure anything if
 you're happy with the defaults.
 
+===============================================================================
+                                                          *luainspect-commands*
+Commands ~
+
 -------------------------------------------------------------------------------
 The *:LuaInspect* command
 
@@ -131,6 +140,24 @@ of choice in your |vimrc| script though. For example:
   nmap <F6>      :LuaInspectToggle<CR>
 <
 -------------------------------------------------------------------------------
+The *:LuaInspectRename* command
+
+This command renames the variable under the cursor. It's used to define the
+'<F2>' mapping and can be used if you don't like the default mappings and want
+to define your own.
+
+-------------------------------------------------------------------------------
+The *:LuaInspectGoTo* command
+
+This command jumps to the definition of the variable under the cursor. It's
+used to define the 'gd' mapping and can be used if you don't like the default
+mappings and want to define your own.
+
+===============================================================================
+                                                           *luainspect-options*
+Options ~
+
+-------------------------------------------------------------------------------
 The *g:loaded_luainspect* option
 
 This variable isn't really an option but if you want to avoid loading the
@@ -139,6 +166,13 @@ script:
 >
   :let g:loaded_luainspect = 1
 <
+-------------------------------------------------------------------------------
+The *g:lua_inspect_mappings* option
+
+If this is set to true (1, the default value) then the '<F2>' and 'gd' mappings
+are defined in Lua buffers (as buffer local mappings). You can set it to false
+(0) to disable the default mappings (so you can define your own).
+
 -------------------------------------------------------------------------------
 The *g:lua_inspect_warnings* option
 
@@ -188,7 +222,7 @@ lua-inspect. If you like this plug-in please vote for it on Vim Online [14].
                                                            *luainspect-license*
 License ~
 
-This software is licensed under the MIT license [15]. ÂŠ 2013 Peter Odding
+This software is licensed under the MIT license [15]. ÂŠ 2014 Peter Odding
 <peter@peterodding.com>.
 
 The source code repository and distributions contain bundled copies of
