@@ -54,6 +54,17 @@ if !exists('g:lua_inspect_internal')
   let g:lua_inspect_internal = has('lua')
 endif
 
+if !exists("g:lua_inspect_disabled_highlight_groups")
+  " The highlighting groups in this list will not be applied to text
+  " after inspection
+  let g:lua_inspect_disabled_highlight_groups = []
+endif
+
+if !exists("g:lua_inspect_suppress_warning")
+  " Warnings, that match regexps in this list will be muted
+  let g:lua_inspect_suppress_warning = []
+endif
+
 " This command enables/updates highlighting when automatic highlighting is disabled.
 command! -bar -bang LuaInspect call xolox#luainspect#highlight_cmd(<q-bang> == '!')
 
