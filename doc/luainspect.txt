@@ -17,6 +17,8 @@ Contents ~
   3. The |g:lua_inspect_warnings| option
   4. The |g:lua_inspect_events| option
   5. The |g:lua_inspect_internal| option
+  6. The |g:lua_inspect_disabled_highlight_groups| option
+  7. The |g:lua_inspect_suppress_warning| option
  6. Contact                                                |luainspect-contact|
  7. License                                                |luainspect-license|
  8. References                                          |luainspect-references|
@@ -208,6 +210,38 @@ you insist on running LuaInspect as an external program you can set this
 variable to false (0) in your |vimrc| script:
 >
   :let g:lua_inspect_internal = 0
+<
+-------------------------------------------------------------------------------
+The *g:lua_inspect_disabled_highlight_groups* option
+
+If you want not to turn all highlighting off, but only some highlighting group
+(unused variables group, for example) then just add the corresponding
+highlight group in this list.
+You can see what highlighting groups does plugin have in the bottom of
+>
+  /autoload/xolox/luainspect.vim
+<
+file.
+
+Note that you'll need to add luaInspect prefix for them to get it work.
+
+Here's example of usage of this option: (line breaks are just for readability)
+>
+  :let g:lua_inspect_disabled_highlighting_groups =
+  ["luaInspectGlobalUndefined", "luaInspectFieldUndefined",
+   "luaInspectLocalUnused"]
+<
+-------------------------------------------------------------------------------
+The *g:lua_inspect_suppress_warning* option
+
+The warnings, that match any of regexp in this list will be muted.
+
+If you want to mute some warning messages you can add a regexp that matches
+that message to this list.
+
+Example usage:
+>
+  :let g:lua_inspect_suppress_warning = ["^unknown global myCfunсUsedInLua"]
 <
 ===============================================================================
                                                            *luainspect-contact*

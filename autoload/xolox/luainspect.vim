@@ -215,7 +215,11 @@ function! s:highlight_variables() " {{{1
       let l2 += 0
       " These adjustments were found by trial and error :-|
       let c1 += 0
-      let c2 += 3 
+      let c2 += 3
+      if index(g:lua_inspect_disabled_highlight_groups, group) != -1
+        continue
+      endif
+      
       if group == 'luaInspectWrongArgCount'
         call matchadd(group, s:highlight_position(l1, c1, l2, c2, 0))
       elseif group == 'luaInspectSelectedVariable' 
@@ -224,6 +228,14 @@ function! s:highlight_variables() " {{{1
         let pattern = s:highlight_position(l1, c1, l2, c2, 1)
         execute 'syntax match' group '/' . pattern . '/'
       endif
+    endif
+  endfor
+endfunction
+
+function! s:is_warning_suppressed(message) " {{{1
+  for suppress_regex in g:lua_inspect_suppress_warning
+    if a:message =~ suppress_regex 
+        return 1
     endif
   endfor
 endfunction
@@ -239,7 +251,9 @@ function! s:update_warnings(warnings) " {{{1
       let linenum = fields[1] + 0
       let colnum = fields[3] + 0
       let message = join(fields[5:-1])
-      call add(list, { 'bufnr': bufnr('%'), 'lnum': linenum, 'col': colnum, 'text': message })
+      if !s:is_warning_suppressed(message)
+        call add(list, { 'bufnr': bufnr('%'), 'lnum': linenum, 'col': colnum, 'text': message })
+      endif
     endif
   endfor
   call setloclist(winnr(), list)
